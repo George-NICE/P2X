@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>全球新能源制绿氢耦合化工项目-交互式可视化报告</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Leaflet.js for Map -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    
+    <!-- Chart.js for Charts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Custom Font and Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide-react@0.379.0/dist/lucide-react.js"></script>
+
+    <style>
+        body {
+            font-family: 'Inter', 'Noto Sans SC', sans-serif;
+            background-color: #f8fafc; /* slate-50 */
+        }
+        .leaflet-popup-content-wrapper {
+            border-radius: 8px;
+        }
+        .leaflet-popup-content {
+            margin: 12px;
+            font-size: 14px;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9; /* slate-100 */
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1; /* slate-300 */
+            border-radius: 3px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8; /* slate-400 */
+        }
+        /* Chart.js legend styling */
+        .chart-legend-item {
+            display: flex;
+            align-items: center;
+            margin-right: 16px;
+            font-size: 12px;
+        }
+        .chart-legend-color-box {
+            width: 12px;
+            height: 12px;
+            margin-right: 8px;
+            border-radius: 2px;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+
+    <div class="min-h-screen flex flex-col">
+        <!-- Header -->
+        <header class="bg-white shadow-md z-20">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+                <h1 class="text-xl sm:text-2xl font-bold text-slate-900">全球绿氢化工项目交互式仪表盘</h1>
+                <div class="flex items-center space-x-2 text-slate-500">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 0 2l-.15.08a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.38a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1 0-2l.15-.08a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                    <span class="text-sm font-medium">数据驱动洞察</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Left Column: Filters and Charts -->
+                <div class="lg:col-span-1 flex flex-col space-y-6">
+                    <!-- Filters -->
+                    <div class="bg-white p-5 rounded-xl shadow-md">
+                        <h2 class="text-lg font-semibold mb-4 text-slate-700">筛选器</h2>
+                        <div class="space-y-4">
+                            <div>
+                                <label for="country-filter" class="block text-sm font-medium text-slate-600 mb-1">所在国家</label>
+                                <select id="country-filter" class="w-full p-2 border border-slate-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                    <option value="all">所有国家</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="status-filter" class="block text-sm font-medium text-slate-600 mb-1">项目状态</label>
+                                <select id="status-filter" class="w-full p-2 border border-slate-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                    <option value="all">所有状态</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="grid-filter" class="block text-sm font-medium text-slate-600 mb-1">并网方式</label>
+                                <select id="grid-filter" class="w-full p-2 border border-slate-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                    <option value="all">所有方式</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Charts -->
+                    <div class="bg-white p-5 rounded-xl shadow-md">
+                        <h2 class="text-lg font-semibold mb-4 text-slate-700">数据洞察</h2>
+                        <div class="space-y-6">
+                            <div>
+                                <h3 class="text-md font-medium text-center text-slate-600 mb-2">各国绿氢产能 (万吨/年)</h3>
+                                <canvas id="capacityChart"></canvas>
+                            </div>
+                             <div>
+                                <h3 class="text-md font-medium text-center text-slate-600 mb-2">各国项目总投资 (亿元人民币)</h3>
+                                <canvas id="investmentChart"></canvas>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <h3 class="text-md font-medium text-center text-slate-600 mb-2">项目状态分布</h3>
+                                    <canvas id="statusChart"></canvas>
+                                </div>
+                                <div>
+                                    <h3 class="text-md font-medium text-center text-slate-600 mb-2">并网方式分布</h3>
+                                    <canvas id="gridChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: Map and Details -->
+                <div class="lg:col-span-2 flex flex-col space-y-6">
+                     <!-- Map -->
+                    <div class="bg-white rounded-xl shadow-md h-[400px] lg:h-[500px] flex flex-col">
+                        <div id="map" class="w-full h-full rounded-xl"></div>
+                    </div>
+                    <!-- Project Details -->
+                    <div id="details-panel" class="bg-white p-5 rounded-xl shadow-md min-h-[300px]">
+                        <div id="details-content" class="h-full">
+                            <div class="flex flex-col justify-center items-center h-full text-slate-500">
+                               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-16 h-16 mb-4 text-slate-300"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                               <p class="text-lg font-medium">请在地图上点击一个项目标记</p>
+                               <p class="text-sm">以查看详细信息</p>
+                           </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // --- DATA SOURCE ---
+        // Extracted and structured data from the report.
+        const projects = [
+            {
+                name: "中石化新疆库车绿氢示范项目",
+                owner: "中国石化",
+                country: "中国",
+                location: { lat: 41.71, lon: 82.93 },
+                grid: "强连接并网型",
+                status: "运营",
+                startDate: "2021-11",
+                operationDate: "2023-06",
+                renewableCapacity: "300MW光伏",
+                h2Capacity: 2.0,
+                product: "炼油加氢，绿氨",
+                productCapacity: "30",
+                investment: 30,
+                bottlenecks: "光伏电力波动对碱性电解槽的冲击；大规模电解槽集群协同控制复杂；输氢管道安全风险。",
+                issues: "2023年8月曾因电压波动导致两次停机。初期产能利用率优化运行。",
+                lessons: "先进控制+氢气缓冲是稳定运行的关键；产能利用率需综合评估；推动了电解槽产业发展。"
+            },
+            {
+                name: "三峡纳日松项目",
+                owner: "三峡集团",
+                country: "中国",
+                location: { lat: 41.91, lon: 119.89 },
+                grid: "强连接并网型",
+                status: "运营",
+                operationDate: "2023-12",
+                renewableCapacity: "480MW光伏",
+                h2Capacity: 1.76, // Estimated from 10万吨氨
+                product: "绿氨",
+                productCapacity: 10,
+                investment: null,
+                bottlenecks: "氨合成工段在负荷宽范围变动下的保温保压问题。",
+                issues: "需要精确控制工艺参数以适应负荷变化。",
+                lessons: "通过恰当工艺参数控制，可在负荷深度调节下（最低30%）保持温度、压力基本稳定。"
+            },
+            {
+                name: "内蒙古鄂尔多斯圣圆煤化工绿氢耦合项目",
+                owner: "圣圆能源",
+                country: "中国",
+                location: { lat: 39.60, lon: 109.78 },
+                grid: "强连接并网型",
+                status: "试运行",
+                operationDate: "2024-03",
+                renewableCapacity: "250MW光伏",
+                h2Capacity: 2.1,
+                product: "绿色甲醇",
+                productCapacity: 10,
+                investment: 49,
+                bottlenecks: "低浓度CO₂捕集效率与成本；CO₂加氢制甲醇催化剂的适应性与寿命。",
+                issues: "PEM电解槽在工业级应用中的长期表现有待验证；化工园区CCUS系统整合协同复杂。",
+                lessons: "PEM电解槽+CCUS是煤化工减碳的有前景路径；CO₂捕集成本是项目经济性关键。"
+            },
+            {
+                name: "新疆昊源光电制氢低碳一体化项目",
+                owner: "新疆昊源",
+                country: "中国",
+                location: { lat: 44.01, lon: 89.13 },
+                grid: "强连接并网型",
+                status: "在建",
+                startDate: "2025-05",
+                h2Capacity: 17.6, // Estimated from downstream products
+                product: "绿氨, 乙醇, 复合肥",
+                productCapacity: "40(氨), 60(乙醇), 50(复合肥)",
+                investment: 100,
+                bottlenecks: "绿氢与煤化工耦合点优化与控制；高温高压合成塔设计与材料；氢气纯度保障与催化剂保护。",
+                issues: "沙尘暴对施工与运营的持续影响；多产品联产系统的复杂调度与平衡。",
+                lessons: "绿氢与煤化工耦合是重要转型路径；恶劣环境下需强化环境适应性设计；需高效气体净化系统。"
+            },
+            {
+                name: "宁夏冠能绿氢耦合BDO项目",
+                owner: "宁夏冠能",
+                country: "中国",
+                location: { lat: 38.46, lon: 106.27 },
+                grid: "强连接并网型",
+                status: "在建",
+                operationDate: "一期2024-06",
+                renewableCapacity: "400MW风光",
+                h2Capacity: 2.6,
+                product: "BDO, PTMEG",
+                productCapacity: 50,
+                investment: 167.1,
+                bottlenecks: "电石乙炔与绿氢耦合工艺的优化与稳定性；多机组电解槽并联控制与效率。",
+                issues: "风沙环境对设备的磨损与影响；化工负荷与制氢波动匹配难题。",
+                lessons: "恶劣环境下需强化防护设计；配置氢气缓冲是保障下游生产的关键；分期建设有助于分散风险。"
+            },
+            {
+                name: "国电投大安风光制氢合成氨一体化项目",
+                owner: "国家电投",
+                country: "中国",
+                location: { lat: 45.49, lon: 123.86 },
+                grid: "弱连接并网型",
+                status: "在建",
+                operationDate: "预计2025-09",
+                renewableCapacity: "800MW风光+40MW/80MWh储能",
+                h2Capacity: 3.2,
+                product: "绿氨/绿醇",
+                productCapacity: 60,
+                investment: 63.32,
+                bottlenecks: "大规模电解槽集群的协同控制效率损失。",
+                issues: "合成氨装置与制氢负荷匹配延迟，影响催化剂和效率。",
+                lessons: "大容量储氢系统仍难完全解决负荷匹配延迟；大型电解槽集群的协同控制是影响能效的关键。"
+            },
+            {
+                name: "中能建松原氢能产业园项目",
+                owner: "中国能建",
+                country: "中国",
+                location: { lat: 45.14, lon: 124.82 },
+                grid: "弱连接并网型",
+                status: "在建",
+                operationDate: "一期预计2025-09",
+                renewableCapacity: "3GW风光",
+                h2Capacity: 11.0,
+                product: "绿氨/绿醇",
+                productCapacity: 60,
+                investment: 296,
+                bottlenecks: "大规模储氢（29500Nm³）的经济性与效率。",
+                issues: "如何通过大规模储氢平抑波动并实现经济性。",
+                lessons: "通过大规模储氢（>8h）缓冲应对风电波动是弱连接模式的典型策略。"
+            },
+            {
+                name: "黑龙江天楹风光储氢氨醇一体化项目",
+                owner: "天楹集团",
+                country: "中国",
+                location: { lat: 47.74, lon: 125.09 },
+                grid: "弱连接并网型",
+                status: "在建",
+                operationDate: "预计2026",
+                renewableCapacity: "1.8GW风光+140MW/280MWh重力储能",
+                h2Capacity: 10.0,
+                product: "绿色甲醇, 航空燃料",
+                productCapacity: 62,
+                investment: 169.5,
+                bottlenecks: "生物质气化焦油的有效处理与清除；大规模重力储能系统的实际性能与经济性。",
+                issues: "极端低温（-30℃）下的设备运行与维护；生物质原料稳定供应；高频维护影响开工率。",
+                lessons: "创新储能技术是重要探索方向；生物质气化焦油处理是关键瓶颈；高寒地区需优先考虑低温适应性设计。"
+            },
+            {
+                name: "国电投吉林白城“氢动吉林”示范项目",
+                owner: "国家电投",
+                country: "中国",
+                location: { lat: 45.62, lon: 122.84 },
+                grid: "离网或半离网型",
+                status: "运营",
+                operationDate: "2023-12",
+                renewableCapacity: "115MW风光",
+                h2Capacity: 0.6,
+                product: "绿氨",
+                productCapacity: "3.2",
+                investment: 12.5,
+                bottlenecks: "离网系统功率突变导致设备跳车；PEM/碱性双技术组合的协同优化；极端低温（-30℃）环境适应性。",
+                issues: "2024年1月曾因风速骤降导致制氢设备跳车。合成氨催化剂对氢气波动敏感。",
+                lessons: "离网项目需极快速缓冲（如超级电容）和预测性控制；极端低温环境必须从源头设计应对。"
+            },
+            {
+                name: "美国犹他州H₂H盐湖城项目",
+                owner: "H2H",
+                country: "美国",
+                location: { lat: 40.76, lon: -111.89 },
+                grid: "离网或半离网型",
+                status: "试运行",
+                operationDate: "2023-10",
+                renewableCapacity: "垃圾气化为主",
+                h2Capacity: 1.1,
+                product: "甲醇, 航空燃料",
+                productCapacity: 50,
+                investment: 86.4,
+                bottlenecks: "垃圾衍生燃料气化合成气的深度净化（脱硫）；催化剂对含硫合成气的耐受性；CO₂矿化封存的规模化与经济性。",
+                issues: "2024年1月因催化剂硫中毒停产检修2周。",
+                lessons: "废弃物制化学品路线的核心挑战是原料气净化；必须配备高效多级净化系统。"
+            },
+            {
+                name: "沙特NEOM绿氢项目",
+                owner: "NEOM Green Hydrogen Company",
+                country: "沙特",
+                location: { lat: 28.37, lon: 35.15 },
+                grid: "离网或半离网型",
+                status: "在建",
+                operationDate: "预计2027",
+                renewableCapacity: "4GW风光",
+                h2Capacity: 21.9,
+                product: "绿氨",
+                productCapacity: "120",
+                investment: 612,
+                bottlenecks: "沙漠环境下的设备腐蚀与防护；海水淡化的高能耗；超大规模电解槽集群（>2GW）的冷却与热管理。",
+                issues: "粉尘可能导致电解槽效率损失7%。海水淡化能耗占总能耗15.8%。",
+                lessons: "极端环境下需强化环境适应性设计；海水淡化能耗不容忽视；长期承购协议是项目成功的关键。"
+            },
+            {
+                name: "Air Products鹿特丹绿氢/甲醇项目",
+                owner: "Air Products",
+                country: "荷兰",
+                location: { lat: 51.92, lon: 4.47 },
+                grid: "弱连接并网型",
+                status: "在建",
+                operationDate: "预计2026",
+                renewableCapacity: "海上风电",
+                h2Capacity: 3.5,
+                product: "绿色甲醇",
+                productCapacity: "35",
+                investment: 54.6,
+                bottlenecks: "海洋环境腐蚀对设备的影响；大规模系统集成与优化；CO₂的捕集、运输与成本。",
+                issues: "海上风电的运维与电力稳定性；PEM电解槽的长期性能与成本；绿色甲醇市场接受度。",
+                lessons: "海上风电制绿醇是重要脱碳路径；需充分应对海洋环境腐蚀；CO₂的获取是项目关键因素。"
+            },
+            {
+                name: "壳牌荷兰氢第一项目",
+                owner: "壳牌",
+                country: "荷兰",
+                location: { lat: 51.95, lon: 4.02 },
+                grid: "强连接并网型",
+                status: "在建",
+                operationDate: "原2025，现不确定",
+                renewableCapacity: "200MW PEM (来自海上风电)",
+                h2Capacity: 2.5, // average of 2.19-2.92
+                product: "炼油加氢",
+                productCapacity: null,
+                investment: 78,
+                bottlenecks: "大规模PEM电解槽的部署与集成；与海上风电的动态耦合运行；敏感区域的安全设计。",
+                issues: "荷兰政府引入的“修正系数”政策大幅削减财政激励，打击项目商业模式。",
+                lessons: "政策稳定是项目成功的关键；需综合评估电力成本；基础设施必须与制氢项目同步。"
+            },
+            {
+                name: "RWE GET H2 Nukleus林根项目",
+                owner: "RWE",
+                country: "德国",
+                location: { lat: 52.52, lon: 7.31 },
+                grid: "强连接并网型",
+                status: "在建",
+                operationDate: "首期2025",
+                renewableCapacity: "海上风电等",
+                h2Capacity: 3, // Estimated
+                product: "工业供氢",
+                productCapacity: "3",
+                investment: null,
+                bottlenecks: "与海上风电及电网的稳定高效集成；大规模盐穴储氢的运营与安全；300MW级电解装置的长期性能。",
+                issues: "高度依赖德国氢气核心管网建设进度；需确保长期稳定的绿氢承购市场。",
+                lessons: "需要“锚定客户”锁定产能；大规模储运基础设施必须与制氢项目同步推进。"
+            },
+            {
+                name: "道达尔能源智利H2 Magallanes绿氢项目",
+                owner: "道达尔能源 (TE H2)",
+                country: "智利",
+                location: { lat: -53.16, lon: -70.91 },
+                grid: "离网或半离网型",
+                status: "在建",
+                startDate: "预计2027",
+                renewableCapacity: "5GW风电",
+                h2Capacity: 63.88,
+                product: "绿氨",
+                productCapacity: "394.2",
+                investment: 1152,
+                bottlenecks: "超大规模风电与电解系统的集成；大规模海水淡化厂的能耗与环境影响；偏远地区大规模基础设施建设。",
+                issues: "确保巨量绿氨产品的国际市场销路；智利国内项目审批流程效率。",
+                lessons: "超大型项目选址必须具备世界级可再生能源资源；配套基础设施建设是项目规划的核心。"
+            }
+        ];
+
+        // --- GLOBAL VARIABLES & STATE ---
+        let map;
+        let capacityChart, investmentChart, statusChart, gridChart;
+        let markers = [];
+
+        // --- UTILITY FUNCTIONS ---
+        const getUniqueValues = (key) => [...new Set(projects.map(p => p[key]))].sort();
+
+        // --- INITIALIZATION ---
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeMap();
+            initializeFilters();
+            initializeCharts();
+            updateDashboard();
+
+            // Add event listeners to filters
+            document.getElementById('country-filter').addEventListener('change', updateDashboard);
+            document.getElementById('status-filter').addEventListener('change', updateDashboard);
+            document.getElementById('grid-filter').addEventListener('change', updateDashboard);
+        });
+
+        // --- MAP INITIALIZATION ---
+        function initializeMap() {
+            map = L.map('map').setView([20, 30], 2); // Global view
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager_labels_under/{z}/{x}/{y}{r}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+                subdomains: 'abcd',
+                maxZoom: 10,
+                minZoom: 2
+            }).addTo(map);
+        }
+
+        // --- FILTERS INITIALIZATION ---
+        function initializeFilters() {
+            const countryFilter = document.getElementById('country-filter');
+            const statusFilter = document.getElementById('status-filter');
+            const gridFilter = document.getElementById('grid-filter');
+            
+            getUniqueValues('country').forEach(val => {
+                const option = document.createElement('option');
+                option.value = val;
+                option.textContent = val;
+                countryFilter.appendChild(option);
+            });
+            
+            getUniqueValues('status').forEach(val => {
+                const option = document.createElement('option');
+                option.value = val;
+                option.textContent = val;
+                statusFilter.appendChild(option);
+            });
+            
+            getUniqueValues('grid').forEach(val => {
+                const option = document.createElement('option');
+                option.value = val;
+                option.textContent = val;
+                gridFilter.appendChild(option);
+            });
+        }
+        
+        // --- CHARTS INITIALIZATION ---
+        function initializeCharts() {
+            const chartOptions = (title) => ({
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        display: false,
+                    },
+                    title: {
+                        display: false,
+                        text: title,
+                    },
+                },
+            });
+            
+            const pieChartOptions = {
+                 responsive: true,
+                 maintainAspectRatio: true,
+                 plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            font: { size: 10 }
+                        }
+                    }
+                 }
+            };
+
+            capacityChart = new Chart(document.getElementById('capacityChart'), {
+                type: 'bar',
+                data: {},
+                options: { ...chartOptions('各国绿氢产能'), indexAxis: 'y' }
+            });
+
+            investmentChart = new Chart(document.getElementById('investmentChart'), {
+                type: 'bar',
+                data: {},
+                options: { ...chartOptions('各国总投资'), indexAxis: 'y' }
+            });
+            
+            statusChart = new Chart(document.getElementById('statusChart'), {
+                type: 'doughnut',
+                data: {},
+                options: pieChartOptions
+            });
+
+            gridChart = new Chart(document.getElementById('gridChart'), {
+                type: 'doughnut',
+                data: {},
+                options: pieChartOptions
+            });
+        }
+        
+        // --- DASHBOARD UPDATE LOGIC ---
+        function updateDashboard() {
+            const countryFilter = document.getElementById('country-filter').value;
+            const statusFilter = document.getElementById('status-filter').value;
+            const gridFilter = document.getElementById('grid-filter').value;
+
+            const filteredProjects = projects.filter(p => {
+                return (countryFilter === 'all' || p.country === countryFilter) &&
+                       (statusFilter === 'all' || p.status === statusFilter) &&
+                       (gridFilter === 'all' || p.grid === gridFilter);
+            });
+
+            updateMap(filteredProjects);
+            updateCharts(filteredProjects);
+        }
+
+        // --- MAP UPDATE ---
+        function updateMap(filteredProjects) {
+            // Clear existing markers
+            markers.forEach(marker => marker.remove());
+            markers = [];
+
+            if (filteredProjects.length === 0) return;
+
+            filteredProjects.forEach(project => {
+                const color = project.status === '运营' ? '#22c55e' : (project.status === '在建' ? '#f59e0b' : '#64748b');
+                const marker = L.circleMarker([project.location.lat, project.location.lon], {
+                    radius: 5 + Math.sqrt(project.h2Capacity || 1), // Radius based on H2 capacity
+                    fillColor: color,
+                    color: '#fff',
+                    weight: 1.5,
+                    opacity: 1,
+                    fillOpacity: 0.8
+                }).addTo(map);
+
+                const popupContent = `
+                    <div class="font-sans">
+                        <h3 class="font-bold text-base mb-1">${project.name}</h3>
+                        <p><strong>状态:</strong> <span style="color:${color};">${project.status}</span></p>
+                        <p><strong>氢气产能:</strong> ${project.h2Capacity || 'N/A'} 万吨/年</p>
+                    </div>
+                `;
+                marker.bindPopup(popupContent);
+                
+                marker.on('click', () => {
+                    updateDetailsPanel(project);
+                });
+
+                markers.push(marker);
+            });
+            
+            // Pan and zoom to fit markers if there are any
+             const group = new L.featureGroup(markers);
+             map.fitBounds(group.getBounds().pad(0.3));
+        }
+
+        // --- CHARTS UPDATE ---
+        function updateCharts(filteredProjects) {
+            const backgroundColors = ['#3b82f6', '#16a34a', '#f97316', '#ef4444', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981'];
+            const borderColors = backgroundColors.map(c => c + 'B3');
+
+            // --- Capacity and Investment by Country ---
+            const capacityByCountry = {};
+            const investmentByCountry = {};
+            filteredProjects.forEach(p => {
+                if(p.h2Capacity) {
+                    capacityByCountry[p.country] = (capacityByCountry[p.country] || 0) + p.h2Capacity;
+                }
+                if(p.investment) {
+                    investmentByCountry[p.country] = (investmentByCountry[p.country] || 0) + p.investment;
+                }
+            });
+
+            const sortedCapacity = Object.entries(capacityByCountry).sort(([,a],[,b]) => a-b);
+            const sortedInvestment = Object.entries(investmentByCountry).sort(([,a],[,b]) => a-b);
+
+            capacityChart.data = {
+                labels: sortedCapacity.map(item => item[0]),
+                datasets: [{
+                    label: '氢气产能 (万吨/年)',
+                    data: sortedCapacity.map(item => item[1].toFixed(2)),
+                    backgroundColor: backgroundColors,
+                    borderColor: borderColors,
+                    borderWidth: 1
+                }]
+            };
+            
+            investmentChart.data = {
+                labels: sortedInvestment.map(item => item[0]),
+                datasets: [{
+                    label: '总投资 (亿元人民币)',
+                    data: sortedInvestment.map(item => item[1].toFixed(2)),
+                    backgroundColor: backgroundColors.slice().reverse(),
+                    borderColor: borderColors.slice().reverse(),
+                    borderWidth: 1
+                }]
+            };
+
+            // --- Status and Grid Type distribution ---
+            const statusCounts = {};
+            const gridCounts = {};
+            filteredProjects.forEach(p => {
+                statusCounts[p.status] = (statusCounts[p.status] || 0) + 1;
+                gridCounts[p.grid] = (gridCounts[p.grid] || 0) + 1;
+            });
+            
+            const pieColors = {
+                '运营': '#22c55e', '在建': '#f59e0b', '试运行': '#64748b',
+                '强连接并网型': '#3b82f6', '弱连接并网型': '#8b5cf6', '离网或半离网型': '#ef4444'
+            };
+
+            statusChart.data = {
+                labels: Object.keys(statusCounts),
+                datasets: [{
+                    data: Object.values(statusCounts),
+                    backgroundColor: Object.keys(statusCounts).map(k => pieColors[k] || '#e2e8f0'),
+                }]
+            };
+            
+            gridChart.data = {
+                labels: Object.keys(gridCounts),
+                datasets: [{
+                    data: Object.values(gridCounts),
+                    backgroundColor: Object.keys(gridCounts).map(k => pieColors[k] || '#e2e8f0'),
+                }]
+            };
+
+            capacityChart.update();
+            investmentChart.update();
+            statusChart.update();
+            gridChart.update();
+        }
+
+        // --- DETAILS PANEL UPDATE ---
+        function updateDetailsPanel(project) {
+            const detailsContent = document.getElementById('details-content');
+            
+            const formatValue = (value, unit = '') => value ? `${value} ${unit}`.trim() : '<span class="text-slate-400">未提供</span>';
+
+            detailsContent.innerHTML = `
+                <div class="h-full flex flex-col custom-scrollbar overflow-y-auto pr-2">
+                    <h3 class="text-2xl font-bold text-slate-900 mb-3">${project.name}</h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 text-sm mb-6">
+                        <div class="flex items-center"><strong class="w-24 text-slate-500">业主:</strong> <span class="font-medium">${formatValue(project.owner)}</span></div>
+                        <div class="flex items-center"><strong class="w-24 text-slate-500">所在国家:</strong> <span class="font-medium">${project.country}</span></div>
+                        <div class="flex items-center"><strong class="w-24 text-slate-500">项目状态:</strong> <span class="font-semibold" style="color:${project.status === '运营' ? '#22c55e' : (project.status === '在建' ? '#f59e0b' : '#64748b')}">${project.status}</span></div>
+                        <div class="flex items-center"><strong class="w-24 text-slate-500">并网方式:</strong> <span class="font-medium">${project.grid}</span></div>
+                        <div class="flex items-center"><strong class="w-24 text-slate-500">开车时间:</strong> <span class="font-medium">${formatValue(project.operationDate)}</span></div>
+                        <div class="flex items-center"><strong class="w-24 text-slate-500">氢气产能:</strong> <span class="font-medium">${formatValue(project.h2Capacity, '万吨/年')}</span></div>
+                        <div class="flex items-center"><strong class="w-24 text-slate-500">下游产品:</strong> <span class="font-medium">${formatValue(project.product)}</span></div>
+                        <div class="flex items-center"><strong class="w-24 text-slate-500">总投资:</strong> <span class="font-medium">${formatValue(project.investment, '亿元人民币')}</span></div>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div>
+                            <h4 class="font-semibold text-slate-700 border-b-2 border-indigo-200 pb-1 mb-2">核心技术瓶颈</h4>
+                            <p class="text-slate-600 text-sm leading-relaxed">${project.bottlenecks || '暂无信息'}</p>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-slate-700 border-b-2 border-amber-200 pb-1 mb-2">运营问题/挑战</h4>
+                            <p class="text-slate-600 text-sm leading-relaxed">${project.issues || '暂无信息'}</p>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-slate-700 border-b-2 border-emerald-200 pb-1 mb-2">经验与教训</h4>
+                            <p class="text-slate-600 text-sm leading-relaxed">${project.lessons || '暂无信息'}</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+    </script>
+</body>
+</html>
