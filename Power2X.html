@@ -161,7 +161,7 @@
                 h2Capacity: 1.0,
                 product: "绿氨 (规划)",
                 productCapacity: null,
-                investment: null,
+                investment: 28.3,
                 bottlenecks: "商业化与规模化经验积累。",
                 issues: "项目主要目标为积累氢能领域经验。",
                 lessons: "作为三峡集团首个光伏制氢项目，为公司培养了氢能人才，积累了宝贵经验。",
@@ -173,15 +173,15 @@
                 country: "中国",
                 location: { lat: 42.18, lon: 116.46 },
                 grid: "离网或半离网型",
-                status: "在建",
-                operationDate: "2023-11-22开工",
+                status: "运营", // Updated from '在建' based on "2025年1月17日正式并网投产"
+                operationDate: "2025-01-17",
                 renewableCapacity: "15万千瓦风光",
                 h2Capacity: 0.63,
                 product: "耦合煤化工用氢，天然气掺氢",
                 productCapacity: null,
-                investment: 1.3, // 施工总承包中标候选报价
+                investment: 13, 
                 bottlenecks: "离网系统稳定性；与煤化工的深度耦合技术；天然气掺氢技术验证。",
-                issues: "建设初期，暂无运行数据。",
+                issues: "已并网投产，具体运行数据待观察。",
                 lessons: "旨在探索绿电、绿氢、绿色煤化工“三位一体”发展新模式，是国内首个中大型风光离网制氢深度耦合煤化工的科技示范项目。",
                 description: "位于内蒙古多伦，是国内首个中大型风光离网制氢深度耦合煤化工的科技示范项目。项目不依赖电网调峰和消纳，完全离网运行。除了耦合煤化工，还探索管道储氢、天然气掺氢等技术，具有很强的技术示范意义。"
             },
@@ -192,14 +192,14 @@
                 location: { lat: 39.10, lon: 107.98 },
                 grid: "弱连接并网型",
                 status: "在建",
-                operationDate: "计划2024-08开工",
+                operationDate: "2024-11-28主体开工",
                 renewableCapacity: "500MW风电场，5MW离网光伏",
                 h2Capacity: 2.0,
                 product: "绿氨",
                 productCapacity: "15",
                 investment: 38.8,
                 bottlenecks: "大规模风电制氢的稳定性；绿氨合成效率。",
-                issues: "计划建设，暂无运行数据。",
+                issues: "项目初期因弃土外运及审批延误，工期面临风险。",
                 lessons: "典型的“新能源发电+绿氢+绿氨”一体化项目，风电并网，80%电力用于制氢。",
                 description: "位于内蒙古鄂尔多斯，总投资38.8亿元。项目核心是利用500MW风电场发电制氢，再与空分氮气合成15万吨绿氨。风电并网但大部分电力（80%）用于制氢，体现了弱连接的并网模式。"
             },
@@ -210,15 +210,15 @@
                 location: { lat: 45.50, lon: 124.28 },
                 grid: "弱连接并网型 (源网荷储一体化)",
                 status: "在建",
-                operationDate: "2023-05开工",
-                renewableCapacity: "风、光、水资源",
+                operationDate: "2023-05开工，已进入调试",
+                renewableCapacity: "800MW (700MW风, 100MW光)",
                 h2Capacity: 3.2,
                 product: "绿氨",
                 productCapacity: "18",
-                investment: null,
+                investment: 59.56,
                 bottlenecks: "源网荷储一体化系统的优化与控制。",
-                issues: "建设初期，暂无运行数据。",
-                lessons: "号称全球最大的绿氢合成氨项目，采用“绿氢消纳绿电、绿氨消纳绿氢”的理念，其“源网荷储一体化”全产业链设计是重要创新点。",
+                issues: "建设中，暂无运行数据。",
+                lessons: "采用混合电解槽（PEM+碱性）兼顾效率与经济性。采用“绿氢消纳绿电、绿氨消纳绿氢”的理念，其“源网荷储一体化”全产业链设计是重要创新点。",
                 description: "位于吉林白城，被称为全球最大的绿氢合成氨项目。其核心理念是“源网荷储一体化”，通过全产业链的耦合设计，实现绿电的就地消纳和绿氢的高效转化，是探索新能源与现代化工深度融合的标杆项目。"
             },
             {
@@ -236,7 +236,7 @@
                 investment: 296,
                 bottlenecks: "多项全球领先技术的大规模集成；柔性合成氨/甲醇技术的可靠性。",
                 issues: "建设初期，暂无运行数据。",
-                lessons: "项目定位为全产业链布局，技术集成度极高，旨在实现“荷随源动”的灵活生产模式，是未来绿氢化工园区的发展方向。",
+                lessons: "项目攻克了新能源波动性与化工生产稳定性的行业难题，让化工负荷随新能源电力“动态起舞”。",
                 description: "位于吉林松原，总投资巨大，是一个全产业链综合项目。涵盖制氢、储运、加氢、氢化工、氢装备等环节。技术上采用多稳态柔性合成氨、CO2+H2制绿色甲醇等前沿技术，致力于实现新能源与化工负荷的动态匹配。"
             },
             {
@@ -266,13 +266,13 @@
                 status: "在建",
                 operationDate: "新能源部分2024-03开工",
                 renewableCapacity: "百万千瓦级新能源大基地",
-                h2Capacity: 1.95, // 1.77 + 0.1825
+                h2Capacity: 1.95, 
                 product: "绿氨，燃料电池级氢气",
                 productCapacity: "10 (氨)",
-                investment: 60, // 含新能源
+                investment: 60, 
                 bottlenecks: "多稳态柔性合成氨技术的大规模应用；电解槽低成本长寿命运行。",
                 issues: "建设初期，暂无运行数据。",
-                lessons: "旨在打造全国首个沿海绿氨综合应用示范工程，深化风光氢氨一体化发展模式。",
+                lessons: "通过自主可控的DCS&SIS系统与数字化平台，围绕绿氢“制、储、输、用”全链条持续完善技术能力，实现“风光氢氨”全流程智能协同。",
                 description: "位于河北沧州，分两期建设。采用13台1000Nm³/h碱性电解槽（中车株洲所中标），并采用多稳态柔性合成氨工艺。项目致力于打造沿海地区的绿氨综合应用示范，探索风光氢氨一体化模式。"
             },
              {
@@ -282,12 +282,12 @@
                 location: { lat: 39.54, lon: 112.44 },
                 grid: "离网或半离网型",
                 status: "在建",
-                operationDate: "2024-03-04备案",
+                operationDate: "计划2025-05开工",
                 renewableCapacity: "一期10万千瓦离网光伏",
-                h2Capacity: 0.28,
+                h2Capacity: 0.2785,
                 product: "耦合煤化工用氢",
                 productCapacity: null,
-                investment: 4.28, // 绿氢耦合部分
+                investment: 4.28,
                 bottlenecks: "离网系统长期可靠性；与煤化工的柔性耦合难度。",
                 issues: "建设初期，暂无运行数据。",
                 lessons: "利用采煤沉陷区土地资源建设离网光伏制氢，实现新能源就地消纳并与现有煤化工耦合，是资源综合利用的典范。",
@@ -302,10 +302,10 @@
                 status: "运营",
                 operationDate: "2024-10 (离网调试成功)",
                 renewableCapacity: "光伏 (离网)",
-                h2Capacity: null,
+                h2Capacity: 0.032, //年产量36万Nm³
                 product: "耦合煤化工用氢",
                 productCapacity: null,
-                investment: null,
+                investment: 1.3,
                 bottlenecks: "高温储热技术应用；离网系统控制；煤化工耦合效率。",
                 issues: "调试运行中，曾攻克储热模块保压、制氢电源偏温等技术难题。",
                 lessons: "成功实现了离网运行，并填补了国内高温储热领域技术空白，为风光氢储一体化方案提供了宝贵经验。",
@@ -323,7 +323,7 @@
                 h2Capacity: 21.9,
                 product: "绿氨 (出口)",
                 productCapacity: "120",
-                investment: 604.8, // 84亿美元
+                investment: 604.8, 
                 bottlenecks: "超大规模可再生能源集成；绿氨储运成本与安全；国际市场波动。",
                 issues: "截至2025年6月，项目建设完成度80%。",
                 lessons: "全球规模最大的绿氢项目之一，采用100%可再生能源，以绿氨形式出口氢能，并签订了30年绿氨承购协议，为大型项目融资和市场开拓提供了范本。",
@@ -341,7 +341,7 @@
                 h2Capacity: 1.73, // I期: 0.13, II期: 1.6
                 product: "炼油厂用氢",
                 productCapacity: null,
-                investment: null, // 主要为政府资助
+                investment: null,
                 bottlenecks: "FOAK工程挑战；与炼厂系统集成复杂；电力采购经济性与法规不确定性。",
                 issues: "I期：报警过多；DCS集成困难；电力成本高昂，导致电解槽利用率低。",
                 lessons: "揭示了FOAK项目的普遍挑战，包括管理模式、技术集成、政策波动等。强调了“一个项目，一个团队”合作模式和早期承包商介入的重要性。",
@@ -356,10 +356,10 @@
                 status: "在建",
                 operationDate: "24MW示范项目预计2023产出",
                 renewableCapacity: "可再生电力 (挪威以水电为主)",
-                h2Capacity: 0.365, // 24MW示范项目
+                h2Capacity: 0.365,
                 product: "绿氨, 绿色化肥",
-                productCapacity: null, // 目标40万吨/年
-                investment: 2.2, // 24MW项目政府资助
+                productCapacity: "目标40",
+                investment: 2.2, 
                 bottlenecks: "现有氨厂改造的兼容性；绿氢成本；大规模电解槽稳定运行。",
                 issues: "示范项目运行数据未详细披露。",
                 lessons: "利用现有大型氨厂进行改造，可快速实现大规模绿氨入市，并利用现有基础设施和运输网络。成立独立清洁氨业务单元，专注新市场开发。",
@@ -377,7 +377,7 @@
                 h2Capacity: 0.8,
                 product: "多种化工产品原料，氢燃料交通",
                 productCapacity: null,
-                investment: 11.7, // 1.5亿欧元
+                investment: 11.7, 
                 bottlenecks: "绿氢成本高企（依赖补贴）；足量且经济的绿电供应；氢气基础设施建设。",
                 issues: "刚投运，无长期运行数据。",
                 lessons: "实现了PEM技术首次直接集成到大型化工Verbund生产环境；利用现有管网避免了重建供应链的高昂成本；是公私合营融资模式的成功案例。",
@@ -486,7 +486,7 @@
             if (filteredProjects.length === 0) return;
 
             filteredProjects.forEach(project => {
-                const statusColors = { '运营': '#22c55e', '在建': '#f59e0b', '试运行': '#3b82f6' };
+                const statusColors = { '运营': '#22c55e', '在建': '#f59e0b', '试运行': '#3b82f6', '运营/在建': '#a855f7'};
                 const color = statusColors[project.status] || '#64748b';
                 
                 const marker = L.circleMarker([project.location.lat, project.location.lon], {
@@ -531,7 +531,7 @@
                 statusCounts[p.status] = (statusCounts[p.status] || 0) + 1;
                 gridCounts[p.grid] = (gridCounts[p.grid] || 0) + 1;
             });
-            const pieColors = { '运营': '#22c55e', '在建': '#f59e0b', '试运行': '#3b82f6' };
+            const pieColors = { '运营': '#22c55e', '在建': '#f59e0b', '试运行': '#3b82f6', '运营/在建': '#a855f7' };
             Object.assign(pieColors, { '强连接并网型': '#6366f1', '弱连接并网型': '#a855f7', '离网或半离网型': '#ec4899', '强连接并网型 (部分并网)': '#6366f1', '弱连接并网型 (源网荷储一体化)': '#a855f7'});
 
             statusChart.data = { labels: Object.keys(statusCounts), datasets: [{ data: Object.values(statusCounts), backgroundColor: Object.keys(statusCounts).map(k => pieColors[k] || '#94a3b8') }] };
@@ -543,7 +543,7 @@
         // --- DETAILS PANEL UPDATE ---
         function updateDetailsPanel(project) {
             const detailsContent = document.getElementById('details-content');
-            const statusColors = { '运营': '#16a34a', '在建': '#d97706', '试运行': '#2563eb' };
+            const statusColors = { '运营': '#16a34a', '在建': '#d97706', '试运行': '#2563eb', '运营/在建': '#9333ea' };
             const statusColor = statusColors[project.status] || '#475569';
 
             detailsContent.innerHTML = `
@@ -591,18 +591,19 @@
 
             const reader = new FileReader();
             reader.onload = function(event) {
-                mammoth.extractRawText({ arrayBuffer: event.target.result })
+                // Use convertToHtml for robust table parsing
+                mammoth.convertToHtml({ arrayBuffer: event.target.result })
                     .then(result => {
                         statusSpan.textContent = '文件读取成功，正在解析...';
-                        const parsedData = parseDocxData(result.value);
-                        if (parsedData.projects.length > 0) {
-                            projects = parsedData.projects; 
+                        const newProjects = parseHtmlData(result.value);
+                        if (newProjects.length > 0) {
+                            projects = newProjects; 
                             populateFilters(); 
                             updateDashboard(); 
                             statusSpan.textContent = `更新成功！加载了 ${projects.length} 个项目。`;
                             statusSpan.style.color = 'green';
                         } else {
-                            throw new Error("未能从文件中解析出有效项目数据。请检查文件格式。");
+                            throw new Error("未能在文件中解析出有效项目数据。请检查文件格式。");
                         }
                     })
                     .catch(err => {
@@ -617,91 +618,72 @@
             };
             reader.readAsArrayBuffer(file);
         }
-
-        function parseDocxData(text) {
-            const lines = text.split('\n').map(line => line.trim()).filter(line => line);
+        
+        // New parsing function using HTML structure
+        function parseHtmlData(htmlString) {
             const newProjects = [];
-            const descriptions = {};
-            
-            // Heuristic to find the start of the table
-            let tableStartIndex = -1;
-            for(let i = 0; i < lines.length; i++) {
-                if(lines[i].startsWith("项目名称,国别,并网方式")) {
-                    tableStartIndex = i + 1; // Data starts on the next line
-                    break;
-                }
-            }
-            if(tableStartIndex === -1) return { projects: [], descriptions: {} };
-
-            // Heuristic to find project descriptions
-            let currentProjectName = null;
-            for(const line of lines) {
-                if (line.endsWith("项目") && !line.includes(',')) {
-                     currentProjectName = line.replace(/：$/, '').trim();
-                     if (!descriptions[currentProjectName]) {
-                         descriptions[currentProjectName] = '';
-                     }
-                } else if (currentProjectName && descriptions[currentProjectName] !== undefined) {
-                    descriptions[currentProjectName] += line + ' ';
-                }
-
-                if (line.startsWith("项目特征,名称")) { // Stop collecting descriptions when table is found
-                    currentProjectName = null;
-                }
-            }
-
-            for (let i = tableStartIndex; i < lines.length; i++) {
-                const columns = lines[i].split(',');
-                if (columns.length >= 13) {
-                    try {
-                        const name = columns[0].trim();
-                        // A simple way to clean up citation numbers like "11."
-                        const cleanedBottlenecks = (columns[10] || '').replace(/\d+\s*$/, '').trim();
-                        const cleanedIssues = (columns[11] || '').replace(/\d+\s*$/, '').trim();
-                        const cleanedLessons = (columns[12] || '').replace(/\d+\s*$/, '').trim();
-
-                        const project = {
-                            name: name,
-                            country: columns[1].trim(),
-                            grid: columns[2].trim(),
-                            status: columns[3].trim(),
-                            operationDate: columns[4].trim(),
-                            renewableCapacity: columns[5].trim(),
-                            h2Capacity: parseFloat(columns[6]) || null,
-                            product: columns[7].trim(),
-                            productCapacity: columns[8].trim(),
-                            investment: parseFloat(columns[9]) || null,
-                            bottlenecks: cleanedBottlenecks,
-                            issues: cleanedIssues,
-                            lessons: cleanedLessons,
-                            location: { lat: 0, lon: 0 }, // Placeholder
-                            description: "请在数据源中为该项目添加描述和坐标。"
-                        };
-                         
-                        // Find matching description
-                        const descKey = Object.keys(descriptions).find(d => d.includes(name) || name.includes(d));
-                        if(descKey) {
-                            project.description = descriptions[descKey].trim();
-                        }
-
-                        // Manually add coordinates for known projects
-                        const knownLocation = projects.find(p => p.name === name);
-                        if (knownLocation) {
-                            project.location = knownLocation.location;
-                        }
-
-                        newProjects.push(project);
-                    } catch (e) {
-                        console.warn(`Skipping malformed line: ${lines[i]}`);
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = htmlString;
+            const allTables = tempDiv.querySelectorAll('table');
+            let projectTable = null;
+        
+            // Heuristically find the project table by checking its header content
+            for (const table of allTables) {
+                const firstRow = table.querySelector('tr');
+                if (firstRow) {
+                    const headerText = firstRow.textContent.toLowerCase();
+                    if (headerText.includes('项目名称') && headerText.includes('国别') && headerText.includes('并网方式')) {
+                        projectTable = table;
+                        break;
                     }
                 }
             }
-            
-            if (newProjects.length === 0) {
-                 alert("解析失败: 无法从Word文档中提取结构化数据。请确保文档中的表格是以逗号分隔的纯文本格式。此功能为实验性功能。");
-                 return { projects: [], descriptions: {} };
+
+            if (!projectTable) {
+                console.warn("Could not find a valid project data table in the document.");
+                alert("解析失败: 未能在Word文档中找到包含'项目名称'和'国别'的有效数据表。请检查文档结构。");
+                return [];
             }
-            return { projects: newProjects, descriptions };
+        
+            const dataRows = projectTable.querySelectorAll('tr');
+            // Start from 1 to skip header row
+            for (let i = 1; i < dataRows.length; i++) {
+                const cells = dataRows[i].querySelectorAll('td');
+                if (cells.length >= 13) {
+                    try {
+                        const name = cells[0].textContent.trim();
+                        if (!name) continue; // Skip empty rows
+
+                        // Merge with existing data to preserve location/description if available
+                        const existingProject = projects.find(p => p.name === name) || {};
+                        
+                        const h2CapRaw = cells[6].textContent.trim();
+                        const h2CapMatch = h2CapRaw.match(/[\d\.]+/);
+                        
+                        const newProject = {
+                            name: name,
+                            country: cells[1].textContent.trim(),
+                            grid: cells[2].textContent.trim(),
+                            status: cells[3].textContent.trim(),
+                            operationDate: cells[4].textContent.trim(),
+                            renewableCapacity: cells[5].textContent.trim(),
+                            h2Capacity: h2CapMatch ? parseFloat(h2CapMatch[0]) : null,
+                            product: cells[7].textContent.trim(),
+                            productCapacity: cells[8].textContent.trim(),
+                            investment: parseFloat(cells[9].textContent.trim()) || null,
+                            bottlenecks: (cells[10].textContent || '').replace(/\d+\s*$/, '').trim(),
+                            issues: (cells[11].textContent || '').replace(/\d+\s*$/, '').trim(),
+                            lessons: (cells[12].textContent || '').replace(/\d+\s*$/, '').trim(),
+                            location: existingProject.location || { lat: 0, lon: 0 },
+                            description: existingProject.description || "从新报告中更新的数据。"
+                        };
+                        newProjects.push(newProject);
+                    } catch (e) {
+                        console.warn(`Skipping malformed row: ${cells[0].textContent}`, e);
+                    }
+                }
+            }
+            return newProjects;
         }
 
     </script>
