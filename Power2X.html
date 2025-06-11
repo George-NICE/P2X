@@ -3,689 +3,539 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>全球新能源制绿氢耦合化工项目-交互式可视化报告</title>
+    <title>全球电氢化耦合项目交互式分析</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- Leaflet.js for Map -->
+    <!-- LeafletJS for Map -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     
     <!-- Chart.js for Charts -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
-    <!-- mammoth.js for DOCX parsing -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.7.0/mammoth.browser.min.js"></script>
 
-    <!-- Custom Font and Icons -->
+    <!-- Google Fonts: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     
     <style>
         body {
-            font-family: 'Inter', 'Noto Sans SC', sans-serif;
-            background-color: #f8fafc; /* slate-50 */
+            font-family: 'Inter', 'Helvetica Neue', 'Arial', 'sans-serif';
+            background-color: #f8fafc; /* gray-50 */
+            color: #1f2937; /* gray-800 */
         }
         .leaflet-popup-content-wrapper {
             border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
         }
         .leaflet-popup-content {
-            margin: 13px 20px 13px 15px;
             font-size: 14px;
             line-height: 1.6;
         }
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-        
-        #details-panel h4 { font-size: 1.1rem; padding-bottom: 0.5rem; margin-bottom: 0.75rem; border-bottom-width: 2px; }
-        #details-panel .detail-item { padding: 0.5rem; border-radius: 0.375rem; transition: background-color 0.2s ease-in-out; }
-        #details-panel .detail-item:hover { background-color: #f1f5f9; }
-
-        .file-upload-btn {
-            background-color: #4f46e5; color: white; padding: 0.5rem 1rem; border-radius: 0.375rem; cursor: pointer; transition: background-color 0.2s;
+        .leaflet-popup-content h3 {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #1e40af; /* blue-800 */
         }
-        .file-upload-btn:hover { background-color: #4338ca; }
-        .update-btn {
-            background-color: #16a34a; color: white; padding: 0.5rem 1rem; border-radius: 0.375rem; cursor: pointer; transition: background-color 0.2s;
+        .section-title {
+            background: linear-gradient(to right, #1d4ed8, #2563eb);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
-        .update-btn:hover { background-color: #15803d; }
+        .active-filter {
+            background-color: #2563eb !important; /* blue-600 */
+            color: #ffffff !important;
+            box-shadow: 0 4px 14px 0 rgb(37 99 235 / 39%);
+        }
+        .hero-gradient {
+            background: linear-gradient(135deg, rgba(2,0,36,1) 0%, rgba(30,64,175,1) 35%, rgba(0,212,255,1) 100%);
+        }
+        .card-hover {
+            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+        }
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800">
+<body class="antialiased">
 
-    <div class="min-h-screen flex flex-col">
-        <!-- Header -->
-        <header class="bg-white shadow-md z-20 sticky top-0">
-            <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-3">
-                <div class="flex flex-wrap justify-between items-center gap-4">
-                    <h1 class="text-xl sm:text-2xl font-bold text-slate-900">全球绿氢化工项目交互式仪表盘</h1>
-                    <div class="flex items-center space-x-3">
-                        <input type="file" id="file-uploader" class="hidden" accept=".docx">
-                        <label for="file-uploader" class="file-upload-btn text-sm font-medium">选择新报告 (.docx)</label>
-                        <button id="update-dashboard-btn" class="update-btn text-sm font-medium">更新仪表盘</button>
-                        <span id="upload-status" class="text-sm text-slate-500"></span>
-                    </div>
-                </div>
+    <!-- Header Section -->
+    <header class="bg-white shadow-md sticky top-0 z-50">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="text-2xl font-bold text-gray-800">
+                <span class="text-blue-700">P2X</span>分析平台
             </div>
-        </header>
+            <div class="hidden md:flex space-x-6 text-gray-600">
+                <a href="#map-section" class="hover:text-blue-600 transition">全球概览</a>
+                <a href="#comparison-section" class="hover:text-blue-600 transition">项目对比</a>
+                <a href="#risk-section" class="hover:text-blue-600 transition">风险矩阵</a>
+                <a href="#tech-section" class="hover:text-blue-600 transition">技术深潜</a>
+                <a href="#policy-section" class="hover:text-blue-600 transition">政策洞察</a>
+            </div>
+            <button id="mobile-menu-button" class="md:hidden flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+                </svg>
+            </button>
+        </nav>
+        <div id="mobile-menu" class="hidden md:hidden px-6 pt-2 pb-4">
+            <a href="#map-section" class="block py-2 text-gray-600 hover:text-blue-600">全球概览</a>
+            <a href="#comparison-section" class="block py-2 text-gray-600 hover:text-blue-600">项目对比</a>
+            <a href="#risk-section" class="block py-2 text-gray-600 hover:text-blue-600">风险矩阵</a>
+            <a href="#tech-section" class="block py-2 text-gray-600 hover:text-blue-600">技术深潜</a>
+            <a href="#policy-section" class="block py-2 text-gray-600 hover:text-blue-600">政策洞察</a>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <main>
+        <div class="relative hero-gradient text-white text-center py-20 md:py-32 px-4">
+            <div class="absolute inset-0 bg-black opacity-20"></div>
+            <div class="relative z-10">
+                <h1 class="text-4xl md:text-6xl font-extrabold mb-4 animate-fade-in-down">全球电氢化耦合项目分析</h1>
+                <p class="text-lg md:text-xl max-w-3xl mx-auto mb-8 animate-fade-in-up">将密集报告转化为动态可视化界面，直观探索全球绿氢项目的数据、风险与机遇。</p>
+                <a href="#map-section" class="bg-white text-blue-700 font-bold py-3 px-8 rounded-full hover:bg-gray-100 transition transform hover:scale-105 shadow-lg">
+                    开始探索
+                </a>
+            </div>
+        </div>
 
         <!-- Main Content -->
-        <main class="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-6">
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <!-- Left Column: Filters and Charts -->
-                <div class="lg:col-span-1 flex flex-col space-y-6">
-                    <!-- Filters -->
-                    <div class="bg-white p-5 rounded-xl shadow-md">
-                        <h2 class="text-lg font-semibold mb-4 text-slate-700">项目筛选器</h2>
-                        <div class="space-y-4">
-                            <div>
-                                <label for="country-filter" class="block text-sm font-medium text-slate-600 mb-1">所在国家</label>
-                                <select id="country-filter" class="w-full p-2 border border-slate-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"></select>
-                            </div>
-                            <div>
-                                <label for="status-filter" class="block text-sm font-medium text-slate-600 mb-1">项目状态</label>
-                                <select id="status-filter" class="w-full p-2 border border-slate-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"></select>
-                            </div>
-                            <div>
-                                <label for="grid-filter" class="block text-sm font-medium text-slate-600 mb-1">并网方式</label>
-                                <select id="grid-filter" class="w-full p-2 border border-slate-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"></select>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Charts -->
-                    <div class="bg-white p-5 rounded-xl shadow-md">
-                        <h2 class="text-lg font-semibold mb-4 text-slate-700">数据洞察</h2>
-                        <div class="space-y-6">
-                            <div><h3 class="text-md font-medium text-center text-slate-600 mb-2">各国绿氢产能 (万吨/年)</h3><canvas id="capacityChart"></canvas></div>
-                            <div><h3 class="text-md font-medium text-center text-slate-600 mb-2">各国项目总投资 (亿元人民币)</h3><canvas id="investmentChart"></canvas></div>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div><h3 class="text-md font-medium text-center text-slate-600 mb-2">项目状态分布</h3><canvas id="statusChart"></canvas></div>
-                                <div><h3 class="text-md font-medium text-center text-slate-600 mb-2">并网方式分布</h3><canvas id="gridChart"></canvas></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
 
-                <!-- Right Column: Map and Details -->
-                <div class="lg:col-span-2 flex flex-col space-y-6">
-                    <div class="bg-white rounded-xl shadow-md h-[400px] lg:h-[500px] flex flex-col"><div id="map" class="w-full h-full rounded-xl"></div></div>
-                    <div id="details-panel" class="bg-white p-6 rounded-xl shadow-md min-h-[400px]">
-                        <div id="details-content" class="h-full custom-scrollbar overflow-y-auto pr-3">
-                           <div class="flex flex-col justify-center items-center h-full text-slate-400">
-                               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-20 h-20 mb-4"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-                               <p class="text-lg font-medium">请在地图上点击一个项目标记</p>
-                               <p class="text-sm">以查看详细信息</p>
-                           </div>
+            <!-- Global Project Overview Section -->
+            <section id="map-section" class="mb-20 scroll-mt-20">
+                <h2 class="text-3xl md:text-4xl font-bold text-center mb-2 section-title">全球项目概览</h2>
+                <p class="text-center text-gray-500 mb-10 max-w-2xl mx-auto">在交互式地图上探索全球关键电氢化耦合项目的位置与基本信息。</p>
+                <div class="bg-white p-4 rounded-xl shadow-lg">
+                    <div id="map" class="h-[500px] md:h-[600px] w-full rounded-lg"></div>
+                </div>
+            </section>
+
+            <!-- Project Comparison Dashboard Section -->
+            <section id="comparison-section" class="mb-20 scroll-mt-20">
+                <h2 class="text-3xl md:text-4xl font-bold text-center mb-2 section-title">项目深度对比</h2>
+                <p class="text-center text-gray-500 mb-10 max-w-2xl mx-auto">选择最多三个项目，并排比较其关键指标，洞察差异与共性。</p>
+                <div class="bg-white p-6 rounded-xl shadow-lg">
+                    <div class="mb-6">
+                        <label for="project-selector" class="block text-lg font-medium text-gray-700 mb-2">选择项目进行对比:</label>
+                        <div id="project-buttons" class="flex flex-wrap gap-3">
+                            <!-- Buttons will be generated by JS -->
                         </div>
                     </div>
+                    <div id="comparison-cards" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <!-- Comparison cards will be generated by JS -->
+                    </div>
                 </div>
-            </div>
-        </main>
-    </div>
+            </section>
+
+            <!-- Risk Analysis Matrix Section -->
+            <section id="risk-section" class="mb-20 scroll-mt-20">
+                <h2 class="text-3xl md:text-4xl font-bold text-center mb-2 section-title">交互式风险矩阵</h2>
+                <p class="text-center text-gray-500 mb-10 max-w-2xl mx-auto">基于报告中的风险矩阵，通过筛选和交互，深入了解各类风险及其应对策略。</p>
+                <div class="bg-white p-6 rounded-xl shadow-lg">
+                    <div class="flex flex-wrap gap-4 mb-6">
+                        <div class="flex-grow">
+                            <label class="font-medium">风险类别:</label>
+                            <div id="risk-category-filter" class="flex flex-wrap gap-2 mt-2"></div>
+                        </div>
+                        <div class="flex-grow">
+                            <label class="font-medium">可能性:</label>
+                            <div id="risk-likelihood-filter" class="flex flex-wrap gap-2 mt-2"></div>
+                        </div>
+                         <div class="flex-grow">
+                            <label class="font-medium">影响程度:</label>
+                            <div id="risk-impact-filter" class="flex flex-wrap gap-2 mt-2"></div>
+                        </div>
+                    </div>
+                    <div id="risk-matrix" class="space-y-4">
+                        <!-- Risk items will be generated here -->
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Technology Deep Dive Section -->
+            <section id="tech-section" class="mb-20 scroll-mt-20">
+                <h2 class="text-3xl md:text-4xl font-bold text-center mb-2 section-title">技术深潜</h2>
+                <p class="text-center text-gray-500 mb-10 max-w-2xl mx-auto">剖析电氢化耦合系统的关键技术环节、挑战与发展趋势。</p>
+                <div class="space-y-4" id="tech-accordion">
+                     <!-- Accordion items will be generated here -->
+                </div>
+            </section>
+
+            <!-- Policy & Market Comparison Section -->
+            <section id="policy-section" class="mb-20 scroll-mt-20">
+                <h2 class="text-3xl md:text-4xl font-bold text-center mb-2 section-title">政策与市场洞察</h2>
+                <p class="text-center text-gray-500 mb-10 max-w-2xl mx-auto">比较全球主要区域在绿氢领域的政策与市场机制，洞察发展驱动力。</p>
+                <div class="bg-white p-6 rounded-xl shadow-lg">
+                    <canvas id="policyChart"></canvas>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-8">
+        <div class="container mx-auto px-6 text-center">
+            <p>全球电氢化耦合项目交互式分析平台</p>
+            <p class="text-sm text-gray-400 mt-2">基于《全球电氢化耦合项目分析报告》构建。仅供学习与参考。</p>
+        </div>
+    </footer>
 
     <script>
-        // --- DATA SOURCE (Updated from "全球电氢化耦合项目分析报告0609.docx") ---
-        let projects = [
-            {
-                name: "中石化新疆库车绿氢示范项目",
-                owner: "中国石化",
-                country: "中国",
-                location: { lat: 41.71, lon: 82.93 },
-                grid: "强连接并网型 (部分并网)",
-                status: "运营",
-                operationDate: "2023-06-30",
-                renewableCapacity: "260MW电解槽，配套光伏",
-                h2Capacity: 2.0,
-                product: "炼化用氢",
-                productCapacity: null,
-                investment: null,
-                bottlenecks: "绿氢成本高；新能源波动性导致设备利用率偏低；产业链配套不成熟。",
-                issues: "已安全平稳运行超过335天，但面临成本和波动性挑战。",
-                lessons: "实现了规模化光伏发电直接制绿氢，产储输用一体化。为行业积累了宝贵的FOAK（首创性）经验。",
-                description: "位于新疆阿克苏，是国内首个万吨级光伏制氢炼化项目。项目采用光伏发电直接制氢（52台碱性电解槽），绿氢通过管道输送至塔河炼化公司。配套21万标立方储氢设施。光伏电站部分电力上网，部分用于制氢。中石化官方指出，该项目揭示了绿氢成本、新能源波动性和产业链配套等核心挑战，但其成功运行证明了技术路线的可行性。"
-            },
-            {
-                name: "三峡纳日松光伏制氢生产绿氨项目",
-                owner: "三峡集团",
-                country: "中国",
-                location: { lat: 39.82, lon: 110.05 },
-                grid: "强连接并网型",
-                status: "运营",
-                operationDate: "2023-12-29 (光伏并网)",
-                renewableCapacity: "40万千瓦光伏，75MW电解槽",
-                h2Capacity: 1.0,
-                product: "绿氨 (规划)",
-                productCapacity: null,
-                investment: 28.3,
-                bottlenecks: "商业化与规模化经验积累。",
-                issues: "项目主要目标为积累氢能领域经验。",
-                lessons: "作为三峡集团首个光伏制氢项目，为公司培养了氢能人才，积累了宝贵经验。",
-                description: "位于内蒙古鄂尔多斯，是三峡集团首个光伏制氢项目。光伏电站已全面并网发电，年产氢约1万吨，副产氧气约8万吨。下游规划生产绿氨。该项目重在为集团积累氢能产业经验。"
-            },
-            {
-                name: "大唐多伦15万千瓦风光制氢一体化示范项目",
-                owner: "大唐集团",
-                country: "中国",
-                location: { lat: 42.18, lon: 116.46 },
-                grid: "离网或半离网型",
-                status: "运营", // Updated from '在建' based on "2025年1月17日正式并网投产"
-                operationDate: "2025-01-17",
-                renewableCapacity: "15万千瓦风光",
-                h2Capacity: 0.63,
-                product: "耦合煤化工用氢，天然气掺氢",
-                productCapacity: null,
-                investment: 13, 
-                bottlenecks: "离网系统稳定性；与煤化工的深度耦合技术；天然气掺氢技术验证。",
-                issues: "已并网投产，具体运行数据待观察。",
-                lessons: "旨在探索绿电、绿氢、绿色煤化工“三位一体”发展新模式，是国内首个中大型风光离网制氢深度耦合煤化工的科技示范项目。",
-                description: "位于内蒙古多伦，是国内首个中大型风光离网制氢深度耦合煤化工的科技示范项目。项目不依赖电网调峰和消纳，完全离网运行。除了耦合煤化工，还探索管道储氢、天然气掺氢等技术，具有很强的技术示范意义。"
-            },
-             {
-                name: "深能鄂托克旗风光制氢一体化合成绿氨项目",
-                owner: "深圳能源",
-                country: "中国",
-                location: { lat: 39.10, lon: 107.98 },
-                grid: "弱连接并网型",
-                status: "在建",
-                operationDate: "2024-11-28主体开工",
-                renewableCapacity: "500MW风电场，5MW离网光伏",
-                h2Capacity: 2.0,
-                product: "绿氨",
-                productCapacity: "15",
-                investment: 38.8,
-                bottlenecks: "大规模风电制氢的稳定性；绿氨合成效率。",
-                issues: "项目初期因弃土外运及审批延误，工期面临风险。",
-                lessons: "典型的“新能源发电+绿氢+绿氨”一体化项目，风电并网，80%电力用于制氢。",
-                description: "位于内蒙古鄂尔多斯，总投资38.8亿元。项目核心是利用500MW风电场发电制氢，再与空分氮气合成15万吨绿氨。风电并网但大部分电力（80%）用于制氢，体现了弱连接的并网模式。"
-            },
-            {
-                name: "国电投大安风光制绿氢合成氨一体化示范项目",
-                owner: "国家电投",
-                country: "中国",
-                location: { lat: 45.50, lon: 124.28 },
-                grid: "弱连接并网型 (源网荷储一体化)",
-                status: "在建",
-                operationDate: "2023-05开工，已进入调试",
-                renewableCapacity: "800MW (700MW风, 100MW光)",
-                h2Capacity: 3.2,
-                product: "绿氨",
-                productCapacity: "18",
-                investment: 59.56,
-                bottlenecks: "源网荷储一体化系统的优化与控制。",
-                issues: "建设中，暂无运行数据。",
-                lessons: "采用混合电解槽（PEM+碱性）兼顾效率与经济性。采用“绿氢消纳绿电、绿氨消纳绿氢”的理念，其“源网荷储一体化”全产业链设计是重要创新点。",
-                description: "位于吉林白城，被称为全球最大的绿氢合成氨项目。其核心理念是“源网荷储一体化”，通过全产业链的耦合设计，实现绿电的就地消纳和绿氢的高效转化，是探索新能源与现代化工深度融合的标杆项目。"
-            },
-            {
-                name: "中能建松原绿色氢氨醇一体化项目",
-                owner: "中国能建",
-                country: "中国",
-                location: { lat: 45.14, lon: 124.82 },
-                grid: "弱连接并网型",
-                status: "在建",
-                operationDate: "2023-10开工",
-                renewableCapacity: "配套300万千瓦新能源",
-                h2Capacity: 11.0,
-                product: "绿氨/绿醇",
-                productCapacity: "60 (氨)/6 (醇)", // 60万吨氨，6万吨甲醇
-                investment: 296,
-                bottlenecks: "多项全球领先技术的大规模集成；柔性合成氨/甲醇技术的可靠性。",
-                issues: "建设初期，暂无运行数据。",
-                lessons: "项目攻克了新能源波动性与化工生产稳定性的行业难题，让化工负荷随新能源电力“动态起舞”。",
-                description: "位于吉林松原，总投资巨大，是一个全产业链综合项目。涵盖制氢、储运、加氢、氢化工、氢装备等环节。技术上采用多稳态柔性合成氨、CO2+H2制绿色甲醇等前沿技术，致力于实现新能源与化工负荷的动态匹配。"
-            },
-            {
-                name: "远景赤峰翁牛特旗绿色氢氨项目",
-                owner: "远景能源",
-                country: "中国",
-                location: { lat: 43.3, lon: 119.0 },
-                grid: "弱连接并网型",
-                status: "在建",
-                operationDate: "元宝山项目预计2024-06开工",
-                renewableCapacity: "风光储一体化",
-                h2Capacity: 11.0,
-                product: "绿氨，绿甲醇",
-                productCapacity: "48 (氨), 12 (甲醇)",
-                investment: 266, // 元宝山项目
-                bottlenecks: "超大规模风光储氢氨醇系统的优化与成本控制。",
-                issues: "建设初期，暂无运行数据。",
-                lessons: "远景能源宣称其为全球最大、成本最低的绿氢氨项目，核心是通过源荷互动和储能优化来降低成本，探索零碳产业园模式。",
-                description: "位于内蒙古赤峰，是远景能源打造的零碳产业园的核心部分。项目强调通过风光储一体化和智能物联网技术，实现源荷之间的最优互动，从而以最低成本生产绿氢、绿氨和绿甲醇，是市场化驱动的典型代表。"
-            },
-            {
-                name: "国华投资沧州10万吨/年绿氢制合成氨项目",
-                owner: "国华投资",
-                country: "中国",
-                location: { lat: 38.3, lon: 117.4 },
-                grid: "强连接并网型",
-                status: "在建",
-                operationDate: "新能源部分2024-03开工",
-                renewableCapacity: "百万千瓦级新能源大基地",
-                h2Capacity: 1.95, 
-                product: "绿氨，燃料电池级氢气",
-                productCapacity: "10 (氨)",
-                investment: 60, 
-                bottlenecks: "多稳态柔性合成氨技术的大规模应用；电解槽低成本长寿命运行。",
-                issues: "建设初期，暂无运行数据。",
-                lessons: "通过自主可控的DCS&SIS系统与数字化平台，围绕绿氢“制、储、输、用”全链条持续完善技术能力，实现“风光氢氨”全流程智能协同。",
-                description: "位于河北沧州，分两期建设。采用13台1000Nm³/h碱性电解槽（中车株洲所中标），并采用多稳态柔性合成氨工艺。项目致力于打造沿海地区的绿氨综合应用示范，探索风光氢氨一体化模式。"
-            },
-             {
-                name: "中煤平朔60万千瓦离网式可再生能源制氢项目",
-                owner: "中煤平朔",
-                country: "中国",
-                location: { lat: 39.54, lon: 112.44 },
-                grid: "离网或半离网型",
-                status: "在建",
-                operationDate: "计划2025-05开工",
-                renewableCapacity: "一期10万千瓦离网光伏",
-                h2Capacity: 0.2785,
-                product: "耦合煤化工用氢",
-                productCapacity: null,
-                investment: 4.28,
-                bottlenecks: "离网系统长期可靠性；与煤化工的柔性耦合难度。",
-                issues: "建设初期，暂无运行数据。",
-                lessons: "利用采煤沉陷区土地资源建设离网光伏制氢，实现新能源就地消纳并与现有煤化工耦合，是资源综合利用的典范。",
-                description: "位于山西朔州平鲁煤矿沉陷区，充分利用了采煤区的土地资源。项目采用离网光伏制氢，柔性耦合现有煤化工项目，是探索传统能源企业转型、实现新能源与煤化工协同发展的典型案例。"
-            },
-            {
-                name: "国能榆林煤化工与新能源耦合示范项目",
-                owner: "国能榆林化工",
-                country: "中国",
-                location: { lat: 38.28, lon: 109.73 },
-                grid: "离网或半离网型",
-                status: "运营",
-                operationDate: "2024-10 (离网调试成功)",
-                renewableCapacity: "光伏 (离网)",
-                h2Capacity: 0.032, //年产量36万Nm³
-                product: "耦合煤化工用氢",
-                productCapacity: null,
-                investment: 1.3,
-                bottlenecks: "高温储热技术应用；离网系统控制；煤化工耦合效率。",
-                issues: "调试运行中，曾攻克储热模块保压、制氢电源偏温等技术难题。",
-                lessons: "成功实现了离网运行，并填补了国内高温储热领域技术空白，为风光氢储一体化方案提供了宝贵经验。",
-                description: "位于陕西榆林，于2024年10月成功实现光伏“离网”制氢调试。项目在攻克储热模块制高压蒸汽、制氢电源稳定等技术难题方面取得了突破，为国内离网制氢耦合化工积累了宝贵的FOAK经验。"
-            },
-            {
-                name: "沙特NEOM绿氢合成氨项目",
-                owner: "NEOM, Air Products, ACWA Power",
-                country: "沙特",
-                location: { lat: 28.37, lon: 35.15 },
-                grid: "离网或半离网型",
-                status: "在建",
-                operationDate: "计划2026年底投产",
-                renewableCapacity: "约4GW (太阳能和风能)",
-                h2Capacity: 21.9,
-                product: "绿氨 (出口)",
-                productCapacity: "120",
-                investment: 604.8, 
-                bottlenecks: "超大规模可再生能源集成；绿氨储运成本与安全；国际市场波动。",
-                issues: "截至2025年6月，项目建设完成度80%。",
-                lessons: "全球规模最大的绿氢项目之一，采用100%可再生能源，以绿氨形式出口氢能，并签订了30年绿氨承购协议，为大型项目融资和市场开拓提供了范本。",
-                description: "位于沙特NEOM新城，是全球旗舰级的绿氢项目。利用约4GW的陆上风光电力，通过2GW德国蒂森克虏伯的碱性电解槽制氢，再合成120万吨/年绿氨用于出口。项目获得了23家银行和金融机构的复杂融资，并由Air Products签订了30年独家承购协议，是商业模式创新的典范。"
-            },
-            {
-                name: "壳牌REFHYNE及REFHYNE II项目",
-                owner: "壳牌等",
-                country: "德国",
-                location: { lat: 50.82, lon: 6.97 },
-                grid: "强连接并网型",
-                status: "运营/在建",
-                operationDate: "I期:2021-07, II期:预计2027",
-                renewableCapacity: "可再生电力",
-                h2Capacity: 1.73, // I期: 0.13, II期: 1.6
-                product: "炼油厂用氢",
-                productCapacity: null,
-                investment: null,
-                bottlenecks: "FOAK工程挑战；与炼厂系统集成复杂；电力采购经济性与法规不确定性。",
-                issues: "I期：报警过多；DCS集成困难；电力成本高昂，导致电解槽利用率低。",
-                lessons: "揭示了FOAK项目的普遍挑战，包括管理模式、技术集成、政策波动等。强调了“一个项目，一个团队”合作模式和早期承包商介入的重要性。",
-                description: "位于德国莱茵兰壳牌能源与化工园区。I期(10MW PEM)已投运，是欧洲首个工业级PEM应用，探索了参与电网平衡服务。II期计划扩建至100MW。该项目为行业提供了宝贵的FOAK经验，尤其是在技术集成、项目管理和应对政策市场变化方面。"
-            },
-            {
-                name: "挪威YARA Porsgrunn绿氨项目 (HEGRA)",
-                owner: "Yara",
-                country: "挪威",
-                location: { lat: 59.14, lon: 9.65 },
-                grid: "强连接并网型",
-                status: "在建",
-                operationDate: "24MW示范项目预计2023产出",
-                renewableCapacity: "可再生电力 (挪威以水电为主)",
-                h2Capacity: 0.365,
-                product: "绿氨, 绿色化肥",
-                productCapacity: "目标40",
-                investment: 2.2, 
-                bottlenecks: "现有氨厂改造的兼容性；绿氢成本；大规模电解槽稳定运行。",
-                issues: "示范项目运行数据未详细披露。",
-                lessons: "利用现有大型氨厂进行改造，可快速实现大规模绿氨入市，并利用现有基础设施和运输网络。成立独立清洁氨业务单元，专注新市场开发。",
-                description: "位于挪威Porsgrunn，通过对现有氨厂进行电气化改造生产绿氨。初期建设24MW PEM电解槽示范。Yara利用其在氨生产和全球贸易物流的领先地位，成立Yara Clean Ammonia独立业务单元，专注于开发船用燃料、发电等清洁氨新市场。"
-            },
-            {
-                name: "巴斯夫Hy4CHem项目",
-                owner: "巴斯夫等",
-                country: "德国",
-                location: { lat: 49.48, lon: 8.44 },
-                grid: "强连接并网型",
-                status: "运营",
-                operationDate: "2025-03-17",
-                renewableCapacity: "可再生电力",
-                h2Capacity: 0.8,
-                product: "多种化工产品原料，氢燃料交通",
-                productCapacity: null,
-                investment: 11.7, 
-                bottlenecks: "绿氢成本高企（依赖补贴）；足量且经济的绿电供应；氢气基础设施建设。",
-                issues: "刚投运，无长期运行数据。",
-                lessons: "实现了PEM技术首次直接集成到大型化工Verbund生产环境；利用现有管网避免了重建供应链的高昂成本；是公私合营融资模式的成功案例。",
-                description: "位于德国路德维希港巴斯夫Verbund基地，是全球首次将54MW PEM电解技术直接集成到大型化工生产环境中。绿氢并入基地氢气管网，用于生产多种化工产品和供应交通。项目采用ISCC+认证的质量平衡法，并依赖政府资金支持，凸显了当前绿氢生产的经济性挑战。"
-            }
-        ];
+        document.addEventListener('DOMContentLoaded', function() {
+            // Mobile Menu Toggle
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenuButton.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+            
+            // Smooth scrolling for navigation links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    document.querySelector(this.getAttribute('href')).scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                     if (mobileMenu.classList.contains('hidden') === false) {
+                        mobileMenu.classList.add('hidden');
+                    }
+                });
+            });
 
-        // --- GLOBAL VARIABLES & STATE ---
-        let map;
-        let capacityChart, investmentChart, statusChart, gridChart;
-        let markers = [];
+            // --- Data from the report ---
+            // UPDATED: Added all projects from the appendix table
+            const projectData = [
+                { name: '中石化库车', country: '中国', investment: '30亿元', production: '2万吨/年', route: '光伏+碱性/PEM', product: '炼油加氢', challenges: '绿氢成本高, 新能源波动', coords: [41.72, 82.97] },
+                { name: '三峡纳日松', country: '中国', investment: '28.3亿元', production: '1万吨/年', route: '光伏+合成氨', product: '绿氨', challenges: '商业化经验积累', coords: [39.84, 110.15] },
+                { name: '大唐多伦', country: '中国', investment: '13亿元', production: '0.63万吨/年', route: '风光离网', product: '甲醇', challenges: '离网系统稳定性', coords: [42.18, 116.48] },
+                { name: '深能鄂托克旗', country: '中国', investment: '38.8亿元', production: '2万吨/年', route: '风电+合成氨', product: '绿氨', challenges: '大规模风电制氢稳定性', coords: [39.09, 107.98] },
+                { name: '国电投大安', country: '中国', investment: '59.56亿元', production: '3.2万吨/年', route: '源网荷储一体化', product: '绿氨', challenges: '系统复杂调度', coords: [45.5, 124.28] },
+                { name: '中能建松原', country: '中国', investment: '296亿元', production: '11万吨/年', route: '风光+合成氨/甲醇', product: '绿氨/醇', challenges: '多技术大规模集成', coords: [45.14, 124.82] },
+                { name: '远景赤峰', country: '中国', investment: '266亿元', production: '11万吨/年', route: '风光储+合成氨/甲醇', product: '绿氨/醇', challenges: '超大规模系统优化与成本控制', coords: [42.27, 118.96] },
+                { name: '国华投资沧州', country: '中国', investment: '60亿元', production: '1.77万吨/年', route: '可再生能源+碱性电解槽', product: '绿氨', challenges: '柔性合成氨技术应用', coords: [38.31, 116.86] },
+                { name: '金风科技兴安盟', country: '中国', investment: '136.65亿元', production: '9.22万吨/年', route: '风电+生物质气化', product: '绿甲醇', challenges: '可再生能源与绿色燃料动态耦合', coords: [46.07, 122.07] },
+                { name: '国能榆林', country: '中国', investment: '1.3亿元', production: 'N/A', route: '离网光伏+高温储热', product: '煤化工用氢', challenges: '高温储热技术应用', coords: [38.29, 109.74] },
+                { name: 'NEOM', country: '沙特阿拉伯', investment: '84亿美元', production: '21.9万吨/年', route: '风光+碱性', product: '绿氨', challenges: '超大规模集成, 国际市场波动', coords: [28.08, 35.31] },
+                { name: 'REFHYNE II', country: '德国', investment: '11.6亿元', production: '1.6万吨/年', route: '可再生电力+PEM', product: '炼油加氢', challenges: 'FOAK工程挑战, 电力成本', coords: [50.82, 6.86] },
+                { name: 'Yara Porsgrunn', country: '挪威', investment: '2.2亿元', production: '0.365万吨/年', route: '可再生电力+PEM', product: '绿氨', challenges: '现有工厂改造兼容性', coords: [59.13, 9.65] },
+                { name: 'Hy4CHem-T', country: '德国', investment: '12.4亿元', production: '0.8万吨/年', route: '可再生电力+PEM', product: '化工用氢', challenges: '绿氢成本高企（依赖补贴）', coords: [49.48, 8.44] },
+            ];
 
-        // --- UTILITY FUNCTIONS ---
-        const getUniqueValues = (key) => [...new Set(projects.map(p => p[key]).filter(Boolean))].sort();
-        const formatValue = (value, unit = '') => (value !== null && value !== undefined && value !== "(未明确)") ? `${value} ${unit}`.trim() : '<span class="text-slate-400">未提供</span>';
+            const riskData = [
+                { category: '技术风险', likelihood: '高', impact: '高', risk: '可再生能源间歇性', strategy: '技术：风光互补+储能（电/氢/热）；超配可再生能源；选用宽负荷调节范围电解槽。运营：与大电网互动（备用/辅助服务）。', case: '中石化库车（电解槽利用率低）' },
+                { category: '技术风险', likelihood: '中-高', impact: '高', risk: '电解槽等核心装备不成熟', strategy: '技术：选用相对成熟技术并进行充分验证；模块化、冗余设计；加强设备测试与验收。财务：设备性能担保；保险。', case: 'REFHYNE（BoP放大挑战）' },
+                { category: '运营风险', likelihood: '高', impact: '高', risk: '绿氢供应波动影响化工生产', strategy: '技术：大规模氢气缓冲储存；化工装置柔性设计。运营：精细化生产调度；煤制氢/灰氢备用。', case: '化工行业普遍要求稳定原料供应' },
+                { category: '经济与市场风险', likelihood: '高', impact: '高', risk: '绿氢成本高', strategy: '技术：提升电解效率；降低设备投资。政策：争取生产补贴/税收优惠；碳定价。市场：培育高价值下游应用。', case: '巴斯夫（无补贴不经济）' },
+                { category: '经济与市场风险', likelihood: '高', impact: '高', risk: '政策与补贴变化', strategy: '财务：多元化收入来源；进行政策敏感性分析。政策：积极参与政策对话，争取长期稳定政策。', case: '全球绿氢项目高度依赖政策' },
+                { category: '安全风险', likelihood: '中', impact: '极高', risk: '氢气泄漏、燃爆', strategy: '技术：本质安全设计；可靠的泄漏检测与通风；惰性气体保护；防爆电气设备。运营：严格的安全操作规程；应急响应预案；人员培训。', case: '电解槽低负荷运行存氢氧互串风险' },
+            ];
 
-        // --- INITIALIZATION ---
-        document.addEventListener('DOMContentLoaded', () => {
-            initializeMap();
-            populateFilters();
-            initializeCharts();
-            updateDashboard();
+            const techData = [
+                { 
+                    title: '电力系统动态', 
+                    content: `
+                        <p class="mb-2"><strong>并网模式:</strong> 分为离网/专线直供（如大唐多伦）、并网型（如中石化库车）和混合模式。离网模式挑战在于内部平衡，需超配新能源和储能；并网模式则依赖绿电溯源和电价经济性。</p>
+                        <p><strong>波动性管理:</strong> 核心策略包括配置多类型储能（电化学、氢、热）、发展电解槽的电网友好型运行（参与调峰调频）、以及构建“源网荷储”一体化系统（如国电投大安）。</p>
+                    ` 
+                },
+                { 
+                    title: '氢能环节', 
+                    content: `
+                        <p class="mb-2"><strong>电解槽技术:</strong> 碱性(AWE)技术成熟成本低但动态响应慢；质子交换膜(PEMWE)动态性能好但成本高昂。GW级项目需综合考虑技术组合、供应链与运维。</p>
+                        <p class="mb-2"><strong>氢气储运:</strong> 短期靠高压气罐缓冲，长期/大规模则依赖液氢、液氨或管道。氨（NH₃）因其成熟的储运体系成为重要的氢载体（如NEOM项目）。</p>
+                        <p><strong>氢安全:</strong> 贯穿全产业链的核心议题，需从设计安全、过程安全、应急响应等全方位构建安全体系，遵循ISO/NFPA/GB等标准。</p>
+                    `
+                },
+                { 
+                    title: '化工过程集成', 
+                    content: `
+                        <p class="mb-2"><strong>波动性应对:</strong> 化工过程要求“安稳长满优”，与波动氢源存在矛盾。需通过氢气缓冲、化工工艺柔性设计、智能控制系统和备用氢源来弥合鸿沟。</p>
+                        <p><strong>系统优化:</strong> 真正的“耦合”是系统级优化，需考虑副产物（如氧气、废热）的梯级利用，实现整体能效最大化。</p>
+                    ` 
+                },
+                { 
+                    title: '碳管理策略', 
+                    content: `
+                        <p>对于耦合煤化工的项目，必须同步管理CO₂排放。策略包括碳捕集、利用与封存(CCUS)。将捕集的CO₂与绿氢结合生产绿甲醇等高价值化学品（CCU），是实现碳循环、提升项目价值的关键路径。</p>
+                    `
+                }
+            ];
 
-            document.getElementById('country-filter').addEventListener('change', updateDashboard);
-            document.getElementById('status-filter').addEventListener('change', updateDashboard);
-            document.getElementById('grid-filter').addEventListener('change', updateDashboard);
-            document.getElementById('update-dashboard-btn').addEventListener('click', handleFileUpload);
-        });
+            const policyData = {
+                labels: ['可再生能源并网', '绿氢生产激励', '绿氢消费激励', '碳定价机制', '标准与认证'],
+                datasets: [
+                    { label: '新疆', data: [3, 4, 2, 1, 3], backgroundColor: 'rgba(59, 130, 246, 0.7)', borderColor: 'rgba(59, 130, 246, 1)', borderWidth: 1 },
+                    { label: '欧盟', data: [5, 4, 4, 5, 5], backgroundColor: 'rgba(234, 179, 8, 0.7)', borderColor: 'rgba(234, 179, 8, 1)', borderWidth: 1 },
+                    { label: '美国', data: [4, 5, 3, 1, 4], backgroundColor: 'rgba(34, 197, 94, 0.7)', borderColor: 'rgba(34, 197, 94, 1)', borderWidth: 1 },
+                    { label: '沙特', data: [4, 4, 1, 1, 3], backgroundColor: 'rgba(239, 68, 68, 0.7)', borderColor: 'rgba(239, 68, 68, 1)', borderWidth: 1 }
+                ]
+            };
 
-        // --- MAP INITIALIZATION ---
-        function initializeMap() {
-            map = L.map('map').setView([30, 50], 2);
-            L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager_labels_under/{z}/{x}/{y}{r}.png', {
+
+            // --- Section 1: Map Initialization ---
+            const map = L.map('map').setView([35, 90], 3);
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
                 attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
                 subdomains: 'abcd',
-                maxZoom: 14,
-                minZoom: 2
+                maxZoom: 19
             }).addTo(map);
-        }
 
-        // --- FILTERS INITIALIZATION ---
-        function populateFilters() {
-            const countryFilter = document.getElementById('country-filter');
-            const statusFilter = document.getElementById('status-filter');
-            const gridFilter = document.getElementById('grid-filter');
-            
-            countryFilter.innerHTML = '<option value="all">所有国家</option>';
-            statusFilter.innerHTML = '<option value="all">所有状态</option>';
-            gridFilter.innerHTML = '<option value="all">所有方式</option>';
-
-            getUniqueValues('country').forEach(val => countryFilter.add(new Option(val, val)));
-            getUniqueValues('status').forEach(val => statusFilter.add(new Option(val, val)));
-            getUniqueValues('grid').forEach(val => gridFilter.add(new Option(val, val)));
-        }
-        
-        // --- CHARTS INITIALIZATION ---
-        function initializeCharts() {
-            Chart.defaults.font.family = "'Inter', 'Noto Sans SC', sans-serif";
-            const pieChartOptions = {
-                 responsive: true,
-                 maintainAspectRatio: true,
-                 plugins: { legend: { position: 'bottom', labels: { font: { size: 11 }, boxWidth: 12, padding: 15 }}}
-            };
-            const barChartOptions = (isY=false) => ({
-                responsive: true,
-                indexAxis: isY ? 'y' : 'x',
-                scales: { x: { ticks: { font: { size: 10 } } }, y: { ticks: { font: { size: 10 } } } },
-                plugins: { legend: { display: false } },
+            projectData.forEach(p => {
+                // Add a check for valid coords
+                if (p.coords && p.coords.length === 2) {
+                    const marker = L.marker(p.coords).addTo(map);
+                    marker.bindPopup(`
+                        <h3>${p.name} (${p.country})</h3>
+                        <strong>投资:</strong> ${p.investment}<br>
+                        <strong>年制氢量:</strong> ${p.production}<br>
+                        <strong>技术路线:</strong> ${p.route}<br>
+                        <strong>下游产品:</strong> ${p.product}<br>
+                        <strong>挑战:</strong> ${p.challenges}
+                    `);
+                }
             });
-            capacityChart = new Chart(document.getElementById('capacityChart'), { type: 'bar', data: {}, options: barChartOptions(true) });
-            investmentChart = new Chart(document.getElementById('investmentChart'), { type: 'bar', data: {}, options: barChartOptions(true) });
-            statusChart = new Chart(document.getElementById('statusChart'), { type: 'doughnut', data: {}, options: pieChartOptions });
-            gridChart = new Chart(document.getElementById('gridChart'), { type: 'doughnut', data: {}, options: pieChartOptions });
-        }
-        
-        // --- DASHBOARD UPDATE LOGIC ---
-        function updateDashboard() {
-            const country = document.getElementById('country-filter').value;
-            const status = document.getElementById('status-filter').value;
-            const grid = document.getElementById('grid-filter').value;
 
-            const filteredProjects = projects.filter(p => 
-                (country === 'all' || p.country === country) &&
-                (status === 'all' || p.status === status) &&
-                (grid === 'all' || p.grid === grid)
-            );
+            // --- Section 2: Project Comparison ---
+            const projectButtonsContainer = document.getElementById('project-buttons');
+            const comparisonCardsContainer = document.getElementById('comparison-cards');
+            let selectedProjects = [];
 
-            updateMap(filteredProjects);
-            updateCharts(filteredProjects);
-            if (filteredProjects.length === 1) {
-                updateDetailsPanel(filteredProjects[0]);
-            } else {
-                 const detailsContent = document.getElementById('details-content');
-                 detailsContent.innerHTML = `<div class="flex flex-col justify-center items-center h-full text-slate-400">
-                               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-20 h-20 mb-4"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-                               <p class="text-lg font-medium">请在地图上点击一个项目标记</p>
-                               <p class="text-sm">以查看详细信息</p>
-                           </div>`;
+            function renderProjectButtons() {
+                projectButtonsContainer.innerHTML = '';
+                projectData.forEach(p => {
+                    const isSelected = selectedProjects.some(sp => sp.name === p.name);
+                    const button = document.createElement('button');
+                    button.textContent = p.name;
+                    button.className = `px-4 py-2 rounded-full border transition text-sm font-medium ${isSelected ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-100'}`;
+                    button.onclick = () => toggleProjectSelection(p);
+                    projectButtonsContainer.appendChild(button);
+                });
             }
-        }
 
-        // --- MAP UPDATE ---
-        function updateMap(filteredProjects) {
-            markers.forEach(marker => marker.remove());
-            markers = [];
-            if (filteredProjects.length === 0) return;
+            function toggleProjectSelection(project) {
+                const index = selectedProjects.findIndex(p => p.name === project.name);
+                if (index > -1) {
+                    selectedProjects.splice(index, 1);
+                } else {
+                    if (selectedProjects.length < 3) {
+                        selectedProjects.push(project);
+                    } else {
+                        // Replace the last selected project
+                        selectedProjects.pop();
+                        selectedProjects.push(project);
+                    }
+                }
+                renderProjectButtons();
+                renderComparisonCards();
+            }
 
-            filteredProjects.forEach(project => {
-                const statusColors = { '运营': '#22c55e', '在建': '#f59e0b', '试运行': '#3b82f6', '运营/在建': '#a855f7'};
-                const color = statusColors[project.status] || '#64748b';
+            function renderComparisonCards() {
+                comparisonCardsContainer.innerHTML = '';
+                if(selectedProjects.length === 0){
+                    comparisonCardsContainer.innerHTML = `<p class="text-center text-gray-500 col-span-full">请点击上方按钮选择项目进行对比。</p>`;
+                    return;
+                }
+                selectedProjects.forEach(p => {
+                    const card = document.createElement('div');
+                    card.className = 'bg-gray-50 p-6 rounded-lg border border-gray-200 card-hover';
+                    card.innerHTML = `
+                        <h3 class="text-xl font-bold text-blue-700 mb-4">${p.name}</h3>
+                        <div class="space-y-3 text-gray-600">
+                            <p><strong><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline mr-2 text-green-500" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clip-rule="evenodd" /></svg>投资:</strong> ${p.investment}</p>
+                            <p><strong><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline mr-2 text-blue-500" viewBox="0 0 20 20" fill="currentColor"><path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" /></svg>年制氢量:</strong> ${p.production}</p>
+                            <p><strong><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline mr-2 text-yellow-500" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.532 1.532 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.532 1.532 0 01-.947-2.287c1.561-.379-1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd" /></svg>技术路线:</strong> ${p.route}</p>
+                            <p><strong><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline mr-2 text-indigo-500" viewBox="0 0 20 20" fill="currentColor"><path d="M5.5 16a3.5 3.5 0 01-.369-6.98 4 4 0 117.753-1.977A4.5 4.5 0 1113.5 16h-8z" /></svg>下游产品:</strong> ${p.product}</p>
+                            <p><strong><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline mr-2 text-red-500" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 3.001-1.742 3.001H4.42c-1.53 0-2.493-1.667-1.743-3.001l5.58-9.92zM10 13a1 1 0 110-2 1 1 0 010 2zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>关键挑战:</strong> ${p.challenges}</p>
+                        </div>
+                    `;
+                    comparisonCardsContainer.appendChild(card);
+                });
+            }
+
+            // Initial render
+            renderProjectButtons();
+            renderComparisonCards();
+
+
+            // --- Section 3: Risk Matrix ---
+            const riskMatrixContainer = document.getElementById('risk-matrix');
+            const categoryFilterContainer = document.getElementById('risk-category-filter');
+            const likelihoodFilterContainer = document.getElementById('risk-likelihood-filter');
+            const impactFilterContainer = document.getElementById('risk-impact-filter');
+            
+            let activeFilters = {
+                category: '全部',
+                likelihood: '全部',
+                impact: '全部'
+            };
+
+            const categories = ['全部', ...new Set(riskData.map(r => r.category))];
+            const likelihoods = ['全部', ...new Set(riskData.map(r => r.likelihood))];
+            const impacts = ['全部', ...new Set(riskData.map(r => r.impact))];
+
+            function createFilterButtons(container, items, filterType) {
+                container.innerHTML = '';
+                items.forEach(item => {
+                    const button = document.createElement('button');
+                    button.textContent = item;
+                    button.className = `filter-btn px-3 py-1.5 text-sm rounded-full border border-gray-300 bg-white text-gray-600 hover:bg-gray-100 transition`;
+                    if (item === activeFilters[filterType]) {
+                        button.classList.add('active-filter');
+                    }
+                    button.onclick = () => {
+                        activeFilters[filterType] = item;
+                        renderRiskMatrix();
+                        updateFilterButtons();
+                    };
+                    container.appendChild(button);
+                });
+            }
+
+            function updateFilterButtons() {
+                createFilterButtons(categoryFilterContainer, categories, 'category');
+                createFilterButtons(likelihoodFilterContainer, likelihoods, 'likelihood');
+                createFilterButtons(impactFilterContainer, impacts, 'impact');
+            }
+
+            function getRiskColor(level) {
+                if (level.includes('高')) return 'bg-red-100 text-red-800';
+                if (level.includes('中')) return 'bg-yellow-100 text-yellow-800';
+                return 'bg-green-100 text-green-800';
+            }
+             function getImpactColor(level) {
+                if (level.includes('极高')) return 'bg-red-200 text-red-900';
+                if (level.includes('高')) return 'bg-red-100 text-red-800';
+                if (level.includes('中')) return 'bg-yellow-100 text-yellow-800';
+                return 'bg-green-100 text-green-800';
+            }
+
+
+            function renderRiskMatrix() {
+                riskMatrixContainer.innerHTML = '';
+                const filteredData = riskData.filter(r => 
+                    (activeFilters.category === '全部' || r.category === activeFilters.category) &&
+                    (activeFilters.likelihood === '全部' || r.likelihood === activeFilters.likelihood) &&
+                    (activeFilters.impact === '全部' || r.impact === activeFilters.impact)
+                );
+
+                if (filteredData.length === 0) {
+                    riskMatrixContainer.innerHTML = '<p class="text-center text-gray-500">没有符合筛选条件的项目。</p>';
+                    return;
+                }
                 
-                const marker = L.circleMarker([project.location.lat, project.location.lon], {
-                    radius: 6 + Math.sqrt(project.h2Capacity || 1) * 2,
-                    fillColor: color, color: '#fff', weight: 1.5, opacity: 1, fillOpacity: 0.8
-                }).addTo(map);
+                filteredData.forEach(r => {
+                    const item = document.createElement('div');
+                    item.className = 'border border-gray-200 rounded-lg overflow-hidden';
+                    item.innerHTML = `
+                        <div class="p-4 bg-gray-50 cursor-pointer risk-header grid grid-cols-1 md:grid-cols-4 gap-4 items-center">
+                            <div class="font-semibold text-gray-800 md:col-span-2">${r.risk}</div>
+                            <div class="flex items-center"><span class="font-medium mr-2 text-gray-500">可能性:</span> <span class="px-2 py-1 text-xs font-medium rounded-full ${getRiskColor(r.likelihood)}">${r.likelihood}</span></div>
+                            <div class="flex items-center"><span class="font-medium mr-2 text-gray-500">影响程度:</span> <span class="px-2 py-1 text-xs font-medium rounded-full ${getImpactColor(r.impact)}">${r.impact}</span></div>
+                        </div>
+                        <div class="p-4 border-t border-gray-200 hidden risk-content">
+                            <p class="mb-2"><strong>应对策略:</strong> ${r.strategy}</p>
+                            <p><strong>项目案例:</strong> <span class="text-blue-600 font-medium">${r.case}</span></p>
+                        </div>
+                    `;
+                    riskMatrixContainer.appendChild(item);
+                });
 
-                marker.bindPopup(`
-                    <div class="font-sans">
-                        <h3 class="font-bold text-base mb-1 text-slate-800">${project.name}</h3>
-                        <p><strong>状态:</strong> <span class="font-semibold" style="color:${color};">${project.status}</span></p>
-                        <p><strong>氢气产能:</strong> ${project.h2Capacity || 'N/A'} 万吨/年</p>
-                    </div>
-                `);
-                marker.on('click', () => updateDetailsPanel(project));
-                markers.push(marker);
-            });
-            
-            if (markers.length > 0) {
-                 const group = new L.featureGroup(markers);
-                 map.fitBounds(group.getBounds().pad(0.3));
-            }
-        }
-
-        // --- CHARTS UPDATE ---
-        function updateCharts(filteredProjects) {
-            const backgroundColors = ['#3b82f6', '#16a34a', '#f97316', '#ef4444', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#64748b'];
-            const capacityByCountry = {}, investmentByCountry = {};
-            filteredProjects.forEach(p => {
-                if(p.h2Capacity) { capacityByCountry[p.country] = (capacityByCountry[p.country] || 0) + p.h2Capacity; }
-                if(p.investment) { investmentByCountry[p.country] = (investmentByCountry[p.country] || 0) + p.investment; }
-            });
-
-            const sortedCapacity = Object.entries(capacityByCountry).sort(([,a],[,b]) => a-b);
-            const sortedInvestment = Object.entries(investmentByCountry).sort(([,a],[,b]) => a-b);
-
-            capacityChart.data = { labels: sortedCapacity.map(item => item[0]), datasets: [{ data: sortedCapacity.map(item => item[1].toFixed(2)), backgroundColor: backgroundColors }] };
-            investmentChart.data = { labels: sortedInvestment.map(item => item[0]), datasets: [{ data: sortedInvestment.map(item => item[1].toFixed(2)), backgroundColor: backgroundColors.slice().reverse() }] };
-
-            const statusCounts = {}, gridCounts = {};
-            filteredProjects.forEach(p => {
-                statusCounts[p.status] = (statusCounts[p.status] || 0) + 1;
-                gridCounts[p.grid] = (gridCounts[p.grid] || 0) + 1;
-            });
-            const pieColors = { '运营': '#22c55e', '在建': '#f59e0b', '试运行': '#3b82f6', '运营/在建': '#a855f7' };
-            Object.assign(pieColors, { '强连接并网型': '#6366f1', '弱连接并网型': '#a855f7', '离网或半离网型': '#ec4899', '强连接并网型 (部分并网)': '#6366f1', '弱连接并网型 (源网荷储一体化)': '#a855f7'});
-
-            statusChart.data = { labels: Object.keys(statusCounts), datasets: [{ data: Object.values(statusCounts), backgroundColor: Object.keys(statusCounts).map(k => pieColors[k] || '#94a3b8') }] };
-            gridChart.data = { labels: Object.keys(gridCounts), datasets: [{ data: Object.values(gridCounts), backgroundColor: Object.keys(gridCounts).map(k => pieColors[k] || '#94a3b8') }] };
-
-            [capacityChart, investmentChart, statusChart, gridChart].forEach(c => c.update());
-        }
-
-        // --- DETAILS PANEL UPDATE ---
-        function updateDetailsPanel(project) {
-            const detailsContent = document.getElementById('details-content');
-            const statusColors = { '运营': '#16a34a', '在建': '#d97706', '试运行': '#2563eb', '运营/在建': '#9333ea' };
-            const statusColor = statusColors[project.status] || '#475569';
-
-            detailsContent.innerHTML = `
-                <div>
-                    <h3 class="text-2xl font-bold text-slate-900 mb-4 pb-2 border-b">${project.name}</h3>
-                    <div class="bg-indigo-50 p-4 rounded-lg mb-6">
-                        <h4 class="font-semibold text-lg text-indigo-800 mb-2">报告摘要</h4>
-                        <p class="text-slate-700 text-sm leading-relaxed">${project.description || '暂无详细描述信息。'}</p>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3 text-sm mb-6">
-                        <div class="flex items-start detail-item"><strong class="w-28 shrink-0 text-slate-500">所有者/业主:</strong> <span class="font-medium">${formatValue(project.owner)}</span></div>
-                        <div class="flex items-start detail-item"><strong class="w-28 shrink-0 text-slate-500">所在国家:</strong> <span class="font-medium">${project.country}</span></div>
-                        <div class="flex items-start detail-item"><strong class="w-28 shrink-0 text-slate-500">项目状态:</strong> <span class="font-semibold py-0.5 px-2 rounded-full text-white" style="background-color:${statusColor}; font-size: 0.75rem;">${project.status}</span></div>
-                        <div class="flex items-start detail-item"><strong class="w-28 shrink-0 text-slate-500">并网方式:</strong> <span class="font-medium">${project.grid}</span></div>
-                        <div class="flex items-start detail-item"><strong class="w-28 shrink-0 text-slate-500">开车/启动时间:</strong> <span class="font-medium">${formatValue(project.operationDate)}</span></div>
-                        <div class="flex items-start detail-item"><strong class="w-28 shrink-0 text-slate-500">可再生能源:</strong> <span class="font-medium">${formatValue(project.renewableCapacity)}</span></div>
-                        <div class="flex items-start detail-item"><strong class="w-28 shrink-0 text-slate-500">氢气产能:</strong> <span class="font-medium text-indigo-600">${formatValue(project.h2Capacity, '万吨/年')}</span></div>
-                        <div class="flex items-start detail-item"><strong class="w-28 shrink-0 text-slate-500">下游产品:</strong> <span class="font-medium">${formatValue(project.product)}</span></div>
-                        <div class="flex items-start detail-item"><strong class="w-28 shrink-0 text-slate-500">产品产能:</strong> <span class="font-medium">${formatValue(project.productCapacity, '万吨/年')}</span></div>
-                        <div class="flex items-start detail-item"><strong class="w-28 shrink-0 text-slate-500">总投资:</strong> <span class="font-medium text-indigo-600">${formatValue(project.investment, '亿元人民币')}</span></div>
-                    </div>
-                    <div class="space-y-5">
-                        <div><h4 class="font-semibold text-slate-700 border-indigo-300">核心技术瓶颈</h4><p class="text-slate-600 text-sm leading-relaxed mt-1">${project.bottlenecks || '暂无信息'}</p></div>
-                        <div><h4 class="font-semibold text-slate-700 border-amber-400">运营问题/挑战</h4><p class="text-slate-600 text-sm leading-relaxed mt-1">${project.issues || '暂无信息'}</p></div>
-                        <div><h4 class="font-semibold text-slate-700 border-emerald-400">经验与教训</h4><p class="text-slate-600 text-sm leading-relaxed mt-1">${project.lessons || '暂无信息'}</p></div>
-                    </div>
-                </div>
-            `;
-        }
-        
-        // --- FILE UPLOAD AND PARSING LOGIC ---
-        function handleFileUpload() {
-            const uploader = document.getElementById('file-uploader');
-            const statusSpan = document.getElementById('upload-status');
-            
-            if (uploader.files.length === 0) {
-                statusSpan.textContent = '请先选择一个文件。';
-                statusSpan.style.color = 'red';
-                return;
-            }
-
-            const file = uploader.files[0];
-            statusSpan.textContent = '正在读取文件...';
-            statusSpan.style.color = 'orange';
-
-            const reader = new FileReader();
-            reader.onload = function(event) {
-                // Use convertToHtml for robust table parsing
-                mammoth.convertToHtml({ arrayBuffer: event.target.result })
-                    .then(result => {
-                        statusSpan.textContent = '文件读取成功，正在解析...';
-                        const newProjects = parseHtmlData(result.value);
-                        if (newProjects.length > 0) {
-                            projects = newProjects; 
-                            populateFilters(); 
-                            updateDashboard(); 
-                            statusSpan.textContent = `更新成功！加载了 ${projects.length} 个项目。`;
-                            statusSpan.style.color = 'green';
-                        } else {
-                            throw new Error("未能在文件中解析出有效项目数据。请检查文件格式。");
-                        }
-                    })
-                    .catch(err => {
-                        console.error("Error processing file:", err);
-                        statusSpan.textContent = `文件处理失败: ${err.message}`;
-                        statusSpan.style.color = 'red';
+                document.querySelectorAll('.risk-header').forEach(header => {
+                    header.addEventListener('click', () => {
+                        header.nextElementSibling.classList.toggle('hidden');
                     });
-            };
-            reader.onerror = function() {
-                statusSpan.textContent = '读取文件失败！';
-                statusSpan.style.color = 'red';
-            };
-            reader.readAsArrayBuffer(file);
-        }
-        
-        // New parsing function using HTML structure
-        function parseHtmlData(htmlString) {
-            const newProjects = [];
-            const tempDiv = document.createElement('div');
-            tempDiv.innerHTML = htmlString;
-            const allTables = tempDiv.querySelectorAll('table');
-            let projectTable = null;
-        
-            // Heuristically find the project table by checking its header content
-            for (const table of allTables) {
-                const firstRow = table.querySelector('tr');
-                if (firstRow) {
-                    const headerText = firstRow.textContent.toLowerCase();
-                    if (headerText.includes('项目名称') && headerText.includes('国别') && headerText.includes('并网方式')) {
-                        projectTable = table;
-                        break;
+                });
+            }
+
+            updateFilterButtons();
+            renderRiskMatrix();
+
+             // --- Section 4: Tech Accordion ---
+            const techAccordionContainer = document.getElementById('tech-accordion');
+            techData.forEach((item, index) => {
+                const accordionItem = document.createElement('div');
+                accordionItem.className = 'border border-gray-200 rounded-lg bg-white card-hover';
+                accordionItem.innerHTML = `
+                    <button class="w-full flex justify-between items-center text-left p-5 font-semibold text-lg text-gray-800 accordion-header">
+                        <span>${item.title}</span>
+                        <svg class="w-6 h-6 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
+                    <div class="accordion-content hidden px-5 pb-5 text-gray-600">
+                        ${item.content}
+                    </div>
+                `;
+                techAccordionContainer.appendChild(accordionItem);
+
+                const header = accordionItem.querySelector('.accordion-header');
+                const content = accordionItem.querySelector('.accordion-content');
+                const icon = header.querySelector('svg');
+
+                header.addEventListener('click', () => {
+                    const isOpen = !content.classList.contains('hidden');
+                    if (isOpen) {
+                        content.classList.add('hidden');
+                        icon.classList.remove('rotate-180');
+                    } else {
+                        content.classList.remove('hidden');
+                        icon.classList.add('rotate-180');
+                    }
+                });
+            });
+
+            // --- Section 5: Policy Chart ---
+            const policyChartCtx = document.getElementById('policyChart').getContext('2d');
+            new Chart(policyChartCtx, {
+                type: 'bar',
+                data: policyData,
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: '全球主要区域绿氢政策机制对比 (评分1-5)',
+                            font: { size: 18 }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.y !== null) {
+                                        const descriptions = {
+                                            '新疆': ['有支持', '有规划', '有鼓励', '有专项政策', '有强力政策'],
+                                            '欧盟': ['有支持', '有规划', '有强制目标', '强力碳价', '完善体系'],
+                                            '美国': ['有支持', '有规划', '部分州目标', '高额补贴', '有枢纽计划'],
+                                            '沙特': ['出口导向', '国家战略', '无国内目标', '项目支持', '对接国际']
+                                        };
+                                        const score = context.parsed.y;
+                                        label += `${score} - ${descriptions[context.dataset.label] ? descriptions[context.dataset.label][score-1] : ''}`;
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 5,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
                     }
                 }
-            }
+            });
 
-            if (!projectTable) {
-                console.warn("Could not find a valid project data table in the document.");
-                alert("解析失败: 未能在Word文档中找到包含'项目名称'和'国别'的有效数据表。请检查文档结构。");
-                return [];
-            }
-        
-            const dataRows = projectTable.querySelectorAll('tr');
-            // Start from 1 to skip header row
-            for (let i = 1; i < dataRows.length; i++) {
-                const cells = dataRows[i].querySelectorAll('td');
-                if (cells.length >= 13) {
-                    try {
-                        const name = cells[0].textContent.trim();
-                        if (!name) continue; // Skip empty rows
-
-                        // Merge with existing data to preserve location/description if available
-                        const existingProject = projects.find(p => p.name === name) || {};
-                        
-                        const h2CapRaw = cells[6].textContent.trim();
-                        const h2CapMatch = h2CapRaw.match(/[\d\.]+/);
-                        
-                        const newProject = {
-                            name: name,
-                            country: cells[1].textContent.trim(),
-                            grid: cells[2].textContent.trim(),
-                            status: cells[3].textContent.trim(),
-                            operationDate: cells[4].textContent.trim(),
-                            renewableCapacity: cells[5].textContent.trim(),
-                            h2Capacity: h2CapMatch ? parseFloat(h2CapMatch[0]) : null,
-                            product: cells[7].textContent.trim(),
-                            productCapacity: cells[8].textContent.trim(),
-                            investment: parseFloat(cells[9].textContent.trim()) || null,
-                            bottlenecks: (cells[10].textContent || '').replace(/\d+\s*$/, '').trim(),
-                            issues: (cells[11].textContent || '').replace(/\d+\s*$/, '').trim(),
-                            lessons: (cells[12].textContent || '').replace(/\d+\s*$/, '').trim(),
-                            location: existingProject.location || { lat: 0, lon: 0 },
-                            description: existingProject.description || "从新报告中更新的数据。"
-                        };
-                        newProjects.push(newProject);
-                    } catch (e) {
-                        console.warn(`Skipping malformed row: ${cells[0].textContent}`, e);
-                    }
-                }
-            }
-            return newProjects;
-        }
-
+        });
     </script>
 </body>
 </html>
